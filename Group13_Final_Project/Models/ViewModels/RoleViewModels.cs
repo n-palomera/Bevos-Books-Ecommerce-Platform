@@ -1,8 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
 
-//TODO: Change this namespace to match your project
-namespace fa23IdentityTemplate.Models
+namespace Group13_Final_Project.Models
 {
     public class RoleEditModel
     {

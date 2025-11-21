@@ -2,12 +2,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
+using Group13_Final_Project.Models;
 
-//TODO: Change these using statements to match your project
-using fa23IdentityTemplate.Models;
-
-//TODO: Change this namespace to match your project
-namespace fa23IdentityTemplate.Controllers
+namespace Group13_Final_Project.Controllers
 {
     //TODO: Uncomment this line once you have roles working correctly
     [Authorize(Roles = "Admin")]

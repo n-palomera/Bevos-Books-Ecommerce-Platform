@@ -1,14 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-
-
-//TODO: Update this using statement to include your project name
-using fa23IdentityTemplate.Models;
-using fa23IdentityTemplate.DAL;
+using Group13_Final_Project.Models;
+using Group13_Final_Project.DAL;
 using System;
 
-//TODO: Upddate this namespace to match your project name
-namespace fa23IdentityTemplate.Controllers
+namespace Group13_Final_Project.Controllers
 {
     public class SeedController : Controller
     {
@@ -27,6 +23,55 @@ namespace fa23IdentityTemplate.Controllers
         {
             return View();
         }
+
+        public async Task<IActionResult> SeedAll()
+        {
+            try
+            {
+                // Seed in the correct order:
+                // 1. Roles
+                // 2. Employees
+                // 3. Customers
+                // 4. Genres
+                // 5. Books
+                // 6. Cards
+                // 7. Reviews
+                // 8. Orders
+                await Seeding.SeedRoles.AddAllRoles(_roleManager);
+                await Seeding.SeedEmployees.SeedAllEmployees(_userManager, _context);
+                await Seeding.SeedCustomers.SeedAllCustomers(_userManager, _context);
+                Seeding.SeedGenres.SeedAllGenres(_context);
+                Seeding.SeedBooks.SeedAllBooks(_context);
+                Seeding.SeedCards.SeedAllCards(_userManager, _context);
+                Seeding.SeedReviews.SeedAllReviews(_userManager, _context);
+                Seeding.SeedOrders.SeedAllOrders(_userManager, _context);
+            }
+            catch (Exception ex)
+            {
+                //add the error messages to a list of strings
+                List<String> errorList = new List<String>();
+
+                //Add the outer message
+                errorList.Add(ex.Message);
+
+                if (ex.InnerException != null)
+                {
+                    //Add the message from the inner exception
+                    errorList.Add(ex.InnerException.Message);
+
+                    //Add additional inner exception messages, if there are any
+                    if (ex.InnerException.InnerException != null)
+                    {
+                        errorList.Add(ex.InnerException.InnerException.Message);
+                    }
+                }
+
+                return View("Error", errorList);
+            }
+
+            //this is the happy path - seeding worked!
+            return View("Confirm");
+        }
         public async Task<IActionResult> SeedRoles()
         {
             try
@@ -43,12 +88,15 @@ namespace fa23IdentityTemplate.Controllers
                 errorList.Add(ex.Message);
 
                 //Add the message from the inner exception
-                errorList.Add(ex.InnerException.Message);
-
-                //Add additional inner exception messages, if there are any
-                if (ex.InnerException.InnerException != null)
+                if (ex.InnerException != null)
                 {
-                    errorList.Add(ex.InnerException.InnerException.Message);
+                    errorList.Add(ex.InnerException.Message);
+
+                    //Add additional inner exception messages, if there are any
+                    if (ex.InnerException.InnerException != null)
+                    {
+                        errorList.Add(ex.InnerException.InnerException.Message);
+                    }
                 }
 
                 return View("Error", errorList);
@@ -82,9 +130,75 @@ namespace fa23IdentityTemplate.Controllers
                     {
                         errorList.Add(ex.InnerException.InnerException.Message);
                     }
-
                 }
 
+                return View("Error", errorList);
+            }
+
+            //this is the happy path - seeding worked!
+            return View("Confirm");
+        }
+
+        public IActionResult SeedGenres()
+        {
+            try
+            {
+                //call the method to seed the genres
+                Seeding.SeedGenres.SeedAllGenres(_context);
+            }
+            catch (Exception ex)
+            {
+                //add the error messages to a list of strings
+                List<String> errorList = new List<String>();
+
+                //Add the outer message
+                errorList.Add(ex.Message);
+
+                if (ex.InnerException != null)
+                {
+                    //Add the message from the inner exception
+                    errorList.Add(ex.InnerException.Message);
+
+                    //Add additional inner exception messages, if there are any
+                    if (ex.InnerException.InnerException != null)
+                    {
+                        errorList.Add(ex.InnerException.InnerException.Message);
+                    }
+                }
+
+                return View("Error", errorList);
+            }
+
+            //this is the happy path - seeding worked!
+            return View("Confirm");
+        }
+
+        public IActionResult SeedBooks()
+        {
+            try
+            {
+                //call the method to seed the books
+                Seeding.SeedBooks.SeedAllBooks(_context);
+            }
+            catch (Exception ex)
+            {
+                //add the error messages to a list of strings
+                List<String> errorList = new List<String>();
+
+                //Add the outer message
+                errorList.Add(ex.Message);
+
+                if (ex.InnerException != null)
+                {
+                    //Add the message from the inner exception
+                    errorList.Add(ex.InnerException.Message);
+
+                    //Add additional inner exception messages, if there are any
+                    if (ex.InnerException.InnerException != null)
+                    {
+                        errorList.Add(ex.InnerException.InnerException.Message);
+                    }
+                }
 
                 return View("Error", errorList);
             }

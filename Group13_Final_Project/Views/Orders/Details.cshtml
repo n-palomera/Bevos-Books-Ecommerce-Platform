@@ -1,0 +1,104 @@
+@model Group13_Final_Project.Models.Order
+
+@{
+    ViewData["Title"] = $"Order #{Model.OrderID}";
+    var orderSubtotal = Model.OrderDetails.Sum(od => od.Quantity * od.Price);
+    var orderTotal = orderSubtotal + Model.ShippingFee;
+}
+
+<h1>Order Details - #@Model.OrderID</h1>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Order Information</h5>
+                <dl class="row">
+                    <dt class="col-sm-3">Order ID:</dt>
+                    <dd class="col-sm-9">@Model.OrderID</dd>
+
+                    <dt class="col-sm-3">Customer:</dt>
+                    <dd class="col-sm-9">@Model.Customer.FirstName @Model.Customer.LastName</dd>
+
+                    <dt class="col-sm-3">Email:</dt>
+                    <dd class="col-sm-9">@Model.Customer.Email</dd>
+
+                    <dt class="col-sm-3">Order Date:</dt>
+                    <dd class="col-sm-9">@Model.OrderDate.ToString("MMMM dd, yyyy")</dd>
+
+                    <dt class="col-sm-3">Status:</dt>
+                    <dd class="col-sm-9">
+                        @switch (Model.OrderStatus)
+                        {
+                            case Group13_Final_Project.Models.OrderStatusEnum.Pending:
+                                <span class="badge badge-warning">Pending</span>
+                                break;
+                            case Group13_Final_Project.Models.OrderStatusEnum.Shipped:
+                                <span class="badge badge-info">Shipped</span>
+                                break;
+                            case Group13_Final_Project.Models.OrderStatusEnum.Delivered:
+                                <span class="badge badge-success">Delivered</span>
+                                break;
+                            case Group13_Final_Project.Models.OrderStatusEnum.Cancelled:
+                                <span class="badge badge-danger">Cancelled</span>
+                                break;
+                        }
+                    </dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Order Items</h5>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Book</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var detail in Model.OrderDetails)
+                        {
+                            <tr>
+                                <td>
+                                    <a asp-controller="Books" asp-action="Details" asp-route-id="@detail.BookID">
+                                        @detail.Book.Title
+                                    </a>
+                                </td>
+                                <td>@detail.Quantity</td>
+                                <td>@detail.Price.ToString("C")</td>
+                                <td>@((detail.Quantity * detail.Price).ToString("C"))</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3" class="text-right"><strong>Subtotal:</strong></td>
+                            <td><strong>@orderSubtotal.ToString("C")</strong></td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" class="text-right"><strong>Shipping:</strong></td>
+                            <td><strong>@Model.ShippingFee.ToString("C")</strong></td>
+                        </tr>
+                        <tr class="table-active">
+                            <td colspan="3" class="text-right"><strong>Total:</strong></td>
+                            <td><strong>@orderTotal.ToString("C")</strong></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <a asp-action="Index" class="btn btn-secondary btn-block">Back to Orders List</a>
+            </div>
+        </div>
+    </div>
+</div>
