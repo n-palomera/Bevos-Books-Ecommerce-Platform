@@ -1,0 +1,67 @@
+@{
+    ViewData["Title"] = "Seed Database";
+}
+
+<h1>Seed the Database</h1>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <p class="lead">Click the buttons below to seed your database with initial data.</p>
+            <p class="text-warning"><strong>Important:</strong> Seed in the correct order for proper foreign key relationships!</p>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <h3>Individual Seeding</h3>
+            <p>Seed data step-by-step in the correct order:</p>
+
+            <div class="list-group">
+                <a href="@Url.Action("SeedRoles", "Seed")" class="list-group-item list-group-item-action">
+                    <strong>1. Seed Roles</strong>
+                    <p class="mb-0 small">Add Admin, Employee, and Customer roles</p>
+                </a>
+
+                <a href="@Url.Action("SeedPeople", "Seed")" class="list-group-item list-group-item-action">
+                    <strong>2. Seed Users</strong>
+                    <p class="mb-0 small">Add initial users (requires roles to be seeded first)</p>
+                </a>
+
+                <a href="@Url.Action("SeedGenres", "Seed")" class="list-group-item list-group-item-action">
+                    <strong>3. Seed Genres</strong>
+                    <p class="mb-0 small">Add all book genres</p>
+                </a>
+
+                <a href="@Url.Action("SeedBooks", "Seed")" class="list-group-item list-group-item-action">
+                    <strong>4. Seed Books</strong>
+                    <p class="mb-0 small">Add all 300 books (requires genres to be seeded first)</p>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <h3>Seed All at Once</h3>
+            <p>Automatically seed everything in the correct order:</p>
+
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h5 class="card-title">Seed All Data</h5>
+                    <p class="card-text">This will seed roles, users, genres, and books in the proper sequence.</p>
+                    <a href="@Url.Action("SeedAll", "Seed")" class="btn btn-primary btn-lg">
+                        Seed All Data
+                    </a>
+                </div>
+            </div>
+
+            <div class="alert alert-info mt-3" role="alert">
+                <h5>Note:</h5>
+                <ul class="mb-0">
+                    <li>Each seed method checks if data already exists</li>
+                    <li>Running a seed multiple times won't duplicate data</li>
+                    <li>Make sure your database connection string is configured</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

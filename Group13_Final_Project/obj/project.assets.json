@@ -8009,19 +8009,19 @@
     ]
   },
   "packageFolders": {
-    "/Users/nathanpalomera/.nuget/packages/": {}
+    "/Users/shanpanjwani/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/nathanpalomera/Desktop/MIS333K/Group13_Final_Project/Group13_Final_Project/Group13_Final_Project.csproj",
+      "projectUniqueName": "/Users/shanpanjwani/Desktop/MIS333K/Group_13_Final_Project/Group-13/Group13_Final_Project/Group13_Final_Project.csproj",
       "projectName": "Group13_Final_Project",
-      "projectPath": "/Users/nathanpalomera/Desktop/MIS333K/Group13_Final_Project/Group13_Final_Project/Group13_Final_Project.csproj",
-      "packagesPath": "/Users/nathanpalomera/.nuget/packages/",
-      "outputPath": "/Users/nathanpalomera/Desktop/MIS333K/Group13_Final_Project/Group13_Final_Project/obj/",
+      "projectPath": "/Users/shanpanjwani/Desktop/MIS333K/Group_13_Final_Project/Group-13/Group13_Final_Project/Group13_Final_Project.csproj",
+      "packagesPath": "/Users/shanpanjwani/.nuget/packages/",
+      "outputPath": "/Users/shanpanjwani/Desktop/MIS333K/Group_13_Final_Project/Group-13/Group13_Final_Project/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/Users/nathanpalomera/.nuget/NuGet/NuGet.Config"
+        "/Users/shanpanjwani/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
@@ -8039,6 +8039,11 @@
         "warnAsError": [
           "NU1605"
         ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
       }
     },
     "frameworks": {

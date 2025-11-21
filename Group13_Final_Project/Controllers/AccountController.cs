@@ -1,15 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-
-//TODO: Change these using statements to match your project
-using fa23IdentityTemplate.DAL;
-using fa23IdentityTemplate.Models;
-using fa23IdentityTemplate.Utilities;
+using Group13_Final_Project.DAL;
+using Group13_Final_Project.Models;
+using Group13_Final_Project.Utilities;
 using System;
 
-//TODO: Change this namespace to match your project
-namespace fa23IdentityTemplate.Controllers
+namespace Group13_Final_Project.Controllers
 {
     [Authorize]
     public class AccountController : Controller

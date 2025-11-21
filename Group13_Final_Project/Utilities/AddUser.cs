@@ -1,12 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System.Text;
+using Group13_Final_Project.DAL;
+using Group13_Final_Project.Models;
 
-//TODO: Update these using statements to include your project name
-using fa23IdentityTemplate.DAL;
-using fa23IdentityTemplate.Models;
-
-//TODO: Upddate this namespace to match your project name
-namespace fa23IdentityTemplate.Utilities
+namespace Group13_Final_Project.Utilities
 {
     public static class AddUser
     {

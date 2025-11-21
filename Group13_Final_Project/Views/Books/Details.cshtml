@@ -1,0 +1,101 @@
+@model Group13_Final_Project.Models.Book
+
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<h1>@Model.Title</h1>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Book Information</h5>
+                <dl class="row">
+                    <dt class="col-sm-3">Title:</dt>
+                    <dd class="col-sm-9">@Model.Title</dd>
+
+                    <dt class="col-sm-3">Author:</dt>
+                    <dd class="col-sm-9">@Model.Authors</dd>
+
+                    <dt class="col-sm-3">Unique Number:</dt>
+                    <dd class="col-sm-9">@Model.BookNumber</dd>
+
+                    <dt class="col-sm-3">Price:</dt>
+                    <dd class="col-sm-9">@Model.Price.ToString("C")</dd>
+
+                    <dt class="col-sm-3">Publication Date:</dt>
+                    <dd class="col-sm-9">@Model.PublishDate.ToString("MMMM dd, yyyy")</dd>
+
+                    <dt class="col-sm-3">Genre:</dt>
+                    <dd class="col-sm-9">@Model.Genre.GenreName</dd>
+
+                    @if (!string.IsNullOrEmpty(Model.Description))
+                    {
+                        <dt class="col-sm-3">Description:</dt>
+                        <dd class="col-sm-9">@Model.Description</dd>
+                    }
+
+                    <dt class="col-sm-3">In Stock:</dt>
+                    <dd class="col-sm-9">
+                        @if (Model.InStock)
+                        {
+                            <span class="badge badge-success">Yes - @Model.InventoryQuantity available</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-danger">Out of Stock</span>
+                        }
+                    </dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Reviews and Ratings</h5>
+
+                @if (Model.AverageRating > 0)
+                {
+                    <p>
+                        <strong>Rating: @Model.AverageRating.ToString("F1") / 5.0</strong> ⭐
+                    </p>
+                }
+                else
+                {
+                    <p class="text-muted">No ratings yet</p>
+                }
+
+                @{
+                    var approvedReviews = Model.Reviews?.Where(r => r.DisputeStatus == Group13_Final_Project.Models.DisputeStatusEnum.Approved).ToList() ?? new List<Group13_Final_Project.Models.Review>();
+                }
+
+                @if (approvedReviews.Any())
+                {
+                    <hr />
+                    <h6>Customer Reviews:</h6>
+                    @foreach (var review in approvedReviews)
+                    {
+                        <div class="mb-3 pb-3 border-bottom">
+                            <p>
+                                <strong>Rating: @review.Rating / 5</strong>
+                            </p>
+                            @if (!string.IsNullOrEmpty(review.ReviewText))
+                            {
+                                <p>"@review.ReviewText"</p>
+                            }
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <a asp-action="Index" class="btn btn-secondary btn-block">Back to Book List</a>
+            </div>
+        </div>
+    </div>
+</div>

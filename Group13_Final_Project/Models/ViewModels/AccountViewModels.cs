@@ -2,8 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System;
 
-//TODO: Change this namespace to match your project
-namespace fa23IdentityTemplate.Models
+namespace Group13_Final_Project.Models
 {
     //NOTE: This is the view model used to allow the user to login
     //The user only needs teh email and password to login

@@ -1,0 +1,27 @@
+@model List<String>
+
+@{
+    ViewData["Title"] = "Seeding Error";
+}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="alert alert-danger" role="alert">
+                <h4 class="alert-heading">Error!</h4>
+                <p>An error occurred while seeding the database:</p>
+                <hr>
+                <ul>
+                    @foreach (String error in Model)
+                    {
+                        <li>@error</li>
+                    }
+                </ul>
+                <hr>
+                <p class="mb-0">
+                    <a href="@Url.Action("Index", "Seed")" class="btn btn-primary">Return to Seed Page</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
