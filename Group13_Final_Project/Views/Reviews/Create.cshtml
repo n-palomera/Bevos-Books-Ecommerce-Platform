@@ -1,0 +1,100 @@
+﻿@model CreateReviewViewModel
+
+@{
+    ViewData["Title"] = "Write a Review";
+}
+
+<h1>Write a Review</h1>
+
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Book Information</h5>
+            </div>
+            <div class="card-body">
+                <h4>@Model.BookTitle</h4>
+                <p class="text-muted">by @Model.BookAuthor</p>
+            </div>
+        </div>
+
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="BookID" />
+
+            <div class="form-group">
+                <label asp-for="Rating" class="control-label"></label>
+                <select asp-for="Rating" class="form-control">
+                    <option value="">Select a rating...</option>
+                    <option value="5">⭐⭐⭐⭐⭐ - Excellent</option>
+                    <option value="4">⭐⭐⭐⭐☆ - Good</option>
+                    <option value="3">⭐⭐⭐☆☆ - Average</option>
+                    <option value="2">⭐⭐☆☆☆ - Below Average</option>
+                    <option value="1">⭐☆☆☆☆ - Poor</option>
+                </select>
+                <span asp-validation-for="Rating" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="ReviewText" class="control-label"></label>
+                <textarea asp-for="ReviewText" class="form-control" rows="4" placeholder="Share your thoughts about this book... (optional, max 100 characters)"></textarea>
+                <span asp-validation-for="ReviewText" class="text-danger"></span>
+                <small class="form-text text-muted">Character count: <span id="charCount">0</span>/100</small>
+            </div>
+
+            <div class="alert alert-info">
+                <strong>Note:</strong> Your review will be pending approval by an employee before it appears on the website. You can only review this book once and cannot change your review after submission.
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Submit Review" class="btn btn-primary" />
+                <a asp-controller="Books" asp-action="Details" asp-route-id="@Model.BookID" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0">Review Guidelines</h5>
+            </div>
+            <div class="card-body">
+                <ul>
+                    <li>Be honest and fair in your review</li>
+                    <li>Focus on your experience with the book</li>
+                    <li>Keep it respectful and constructive</li>
+                    <li>Reviews are limited to 100 characters</li>
+                    <li>You can only review books you've purchased</li>
+                    <li>Each book can only be reviewed once per customer</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>// Character counter
+        document.addEventListener('DOMContentLoaded', function() {
+            const textarea = document.querySelector('textarea[name="ReviewText"]');
+            const charCount = document.getElementById('charCount');
+
+            if (textarea && charCount) {
+                textarea.addEventListener('input', function() {
+                    charCount.textContent = this.value.length;
+
+                    if (this.value.length > 100) {
+                        charCount.style.color = 'red';
+                    } else {
+                        charCount.style.color = 'inherit';
+                    }
+                });
+
+                // Initial count
+                charCount.textContent = textarea.value.length;
+            }
+        });</script>
+}

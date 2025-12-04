@@ -1,0 +1,122 @@
+﻿@model IEnumerable<Review>
+
+@{
+    ViewData["Title"] = "My Reviews";
+}
+
+<h1>My Reviews</h1>
+<p class="lead">View all the reviews you've submitted</p>
+
+<hr />
+
+@if (Model != null && Model.Any())
+{
+    <p><strong>Total Reviews: @Model.Count()</strong></p>
+
+    <div class="row">
+        @foreach (var review in Model)
+        {
+            <div class="col-md-12 mb-3">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h5>
+                                    <a asp-controller="Books" asp-action="Details" asp-route-id="@review.BookID">
+                                        @review.Book.Title
+                                    </a>
+                                </h5>
+                                <small class="text-muted">by @review.Book.Authors</small>
+                            </div>
+                            <div class="col-md-4 text-right">
+                                @if (review.DisputeStatus == DisputeStatusEnum.Approved)
+                                {
+                                    <span class="badge badge-success badge-lg">✓ Approved</span>
+                                }
+                                else if (review.DisputeStatus == DisputeStatusEnum.Pending)
+                                {
+                                    <span class="badge badge-warning badge-lg">⏳ Pending</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-danger badge-lg">✗ Rejected</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <p>
+                                    <strong>Your Rating:</strong>
+                                    <span class="text-warning">
+                                        @for (int i = 0; i < review.Rating; i++)
+                                        {
+                                            <span>★</span>
+                                        }
+                                        @for (int i = review.Rating; i < 5; i++)
+                                        {
+                                            <span>☆</span>
+                                        }
+                                    </span>
+                                    (@review.Rating/5)
+                                </p>
+
+                                @if (!string.IsNullOrEmpty(review.ReviewText))
+                                {
+                                    <p><strong>Your Review:</strong></p>
+                                    <blockquote class="blockquote">
+                                        <p class="mb-0">"@review.ReviewText"</p>
+                                    </blockquote>
+                                }
+                                else
+                                {
+                                    <p class="text-muted"><em>No written review provided</em></p>
+                                }
+
+                                @if (review.DisputeStatus == DisputeStatusEnum.Approved && review.Approver != null)
+                                {
+                                    <p class="text-success">
+                                        <small>Approved by @review.Approver.FirstName @review.Approver.LastName</small>
+                                    </p>
+                                }
+                                else if (review.DisputeStatus == DisputeStatusEnum.Rejected)
+                                {
+                                    <div class="alert alert-warning">
+                                        <strong>Review Status:</strong> This review was not approved for display on the website.
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="alert alert-info">
+                                        <strong>Pending Approval:</strong> Your review is waiting to be reviewed by our team.
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="alert alert-info">
+        <h5>No reviews yet</h5>
+        <p>You haven't written any reviews. Purchase a book and share your thoughts!</p>
+        <a asp-controller="Books" asp-action="Index" class="btn btn-primary">Browse Books</a>
+    </div>
+}
+
+<div class="mt-4">
+    <a asp-controller="Account" asp-action="Index" class="btn btn-secondary">Back to Account</a>
+    <a asp-controller="Account" asp-action="OrderHistory" class="btn btn-info">View Order History</a>
+</div>
+
+<style>
+    .badge-lg {
+        font-size: 1rem;
+        padding: 0.5rem 1rem;
+    }
+</style>
