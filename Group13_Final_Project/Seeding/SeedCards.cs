@@ -33,7 +33,7 @@ namespace Group13_Final_Project.Seeding
             foreach (var data in CardData)
             {
                 var customer = db.Users.FirstOrDefault(u => u.Email == data.Item1);
-                
+
                 if (customer != null)
                 {
                     Card card = new Card

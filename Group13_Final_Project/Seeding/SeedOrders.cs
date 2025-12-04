@@ -17,151 +17,453 @@ namespace Group13_Final_Project.Seeding
                 return;
             }
 
-            // Group order items by OrderId
-            List<(int OrderId, string CustomerName, DateTime OrderDate, decimal ShippingFee, string OrderStatus, List<(string BookTitle, decimal Price, decimal Cost, int Quantity)> Items)> OrderData = new List<(int, string, DateTime, decimal, string, List<(string, decimal, decimal, int)>)>();
-
             // Order 10001
-            OrderData.Add((10001, "Christopher Baker", new DateTime(2025, 1, 1), 0.0m, "InCart", new List<(string, decimal, decimal, int)>
+            var customer10001 = db.Users.FirstOrDefault(u => u.Email == "cbaker@example.com");
+            if (customer10001 != null)
             {
-                ("The Art Of Racing In The Rain", 23.95m, 10.3m, 3),
-                ("The Host", 25.99m, 13.25m, 1),
-            }));
+                Order order10001 = new Order
+                {
+                    OrderNumber = 10001,
+                    CustomerID = customer10001.Id,
+                    OrderDate = DateTime.Now,
+                    ShippingFee = 0.0m,
+                    OrderStatus = OrderStatusEnum.Pending,
+                    OrderDetails = new List<OrderDetail>()
+                };
+
+                var book10001_0 = db.Books.FirstOrDefault(b => b.Title == "The Art Of Racing In The Rain");
+                if (book10001_0 != null)
+                {
+                    order10001.OrderDetails.Add(new OrderDetail
+                    {
+                        BookID = book10001_0.BookID,
+                        Quantity = 2,
+                        Price = 23.95m,
+                        Cost = 10.3m
+                    });
+                }
+
+                var book10001_1 = db.Books.FirstOrDefault(b => b.Title == "The Host");
+                if (book10001_1 != null)
+                {
+                    order10001.OrderDetails.Add(new OrderDetail
+                    {
+                        BookID = book10001_1.BookID,
+                        Quantity = 1,
+                        Price = 25.99m,
+                        Cost = 13.25m
+                    });
+                }
+
+                db.Orders.Add(order10001);
+            }
 
             // Order 10002
-            OrderData.Add((10002, "Todd Jacobs", new DateTime(2025, 1, 1), 0.0m, "InCart", new List<(string, decimal, decimal, int)>
+            var customer10002 = db.Users.FirstOrDefault(u => u.Email == "toddj@yourmom.com");
+            if (customer10002 != null)
             {
-                ("Roses", 24.99m, 20.99m, 2),
-            }));
+                Order order10002 = new Order
+                {
+                    OrderNumber = 10002,
+                    CustomerID = customer10002.Id,
+                    OrderDate = DateTime.Now,
+                    ShippingFee = 0.0m,
+                    OrderStatus = OrderStatusEnum.Pending,
+                    OrderDetails = new List<OrderDetail>()
+                };
+
+                var book10002_2 = db.Books.FirstOrDefault(b => b.Title == "Roses");
+                if (book10002_2 != null)
+                {
+                    order10002.OrderDetails.Add(new OrderDetail
+                    {
+                        BookID = book10002_2.BookID,
+                        Quantity = 2,
+                        Price = 24.99m,
+                        Cost = 20.99m
+                    });
+                }
+
+                db.Orders.Add(order10002);
+            }
 
             // Order 10003
-            OrderData.Add((10003, "Charles Miller", new DateTime(2025, 1, 1), 0.0m, "InCart", new List<(string, decimal, decimal, int)>
+            var customer10003 = db.Users.FirstOrDefault(u => u.Email == "cmiller@bob.com");
+            if (customer10003 != null)
             {
-                ("Altar of Eden", 27.99m, 25.75m, 2),
-            }));
+                Order order10003 = new Order
+                {
+                    OrderNumber = 10003,
+                    CustomerID = customer10003.Id,
+                    OrderDate = DateTime.Now,
+                    ShippingFee = 0.0m,
+                    OrderStatus = OrderStatusEnum.Pending,
+                    OrderDetails = new List<OrderDetail>()
+                };
+
+                var book10003_3 = db.Books.FirstOrDefault(b => b.Title == "Altar of Eden");
+                if (book10003_3 != null)
+                {
+                    order10003.OrderDetails.Add(new OrderDetail
+                    {
+                        BookID = book10003_3.BookID,
+                        Quantity = 1,
+                        Price = 27.99m,
+                        Cost = 25.75m
+                    });
+                }
+
+                db.Orders.Add(order10003);
+            }
 
             // Order 10004
-            OrderData.Add((10004, "Wendy Chang", new DateTime(2025, 10, 31), 3.5m, "Ordered", new List<(string, decimal, decimal, int)>
+            var customer10004 = db.Users.FirstOrDefault(u => u.Email == "wchang@example.com");
+            if (customer10004 != null)
             {
-                ("The Professional", 26.95m, 7.01m, 1),
-            }));
+                Order order10004 = new Order
+                {
+                    OrderNumber = 10004,
+                    CustomerID = customer10004.Id,
+                    OrderDate = new DateTime(2025, 10, 31),
+                    ShippingFee = 3.5m,
+                    OrderStatus = OrderStatusEnum.Pending,
+                    OrderDetails = new List<OrderDetail>()
+                };
+
+                var book10004_4 = db.Books.FirstOrDefault(b => b.Title == "The Professional");
+                if (book10004_4 != null)
+                {
+                    order10004.OrderDetails.Add(new OrderDetail
+                    {
+                        BookID = book10004_4.BookID,
+                        Quantity = 1,
+                        Price = 26.95m,
+                        Cost = 7.01m
+                    });
+                }
+
+                db.Orders.Add(order10004);
+            }
 
             // Order 10005
-            OrderData.Add((10005, "Christopher Baker", new DateTime(2025, 10, 1), 9.5m, "Ordered", new List<(string, decimal, decimal, int)>
+            var customer10005 = db.Users.FirstOrDefault(u => u.Email == "cbaker@example.com");
+            if (customer10005 != null)
             {
-                ("Say Goodbye", 25.0m, 11.25m, 5),
-                ("Chasing Darkness", 25.95m, 9.08m, 1),
-            }));
+                Order order10005 = new Order
+                {
+                    OrderNumber = 10005,
+                    CustomerID = customer10005.Id,
+                    OrderDate = new DateTime(2025, 10, 1),
+                    ShippingFee = 9.5m,
+                    OrderStatus = OrderStatusEnum.Pending,
+                    OrderDetails = new List<OrderDetail>()
+                };
+
+                var book10005_5 = db.Books.FirstOrDefault(b => b.Title == "Say Goodbye");
+                if (book10005_5 != null)
+                {
+                    order10005.OrderDetails.Add(new OrderDetail
+                    {
+                        BookID = book10005_5.BookID,
+                        Quantity = 5,
+                        Price = 25.0m,
+                        Cost = 11.25m
+                    });
+                }
+
+                var book10005_6 = db.Books.FirstOrDefault(b => b.Title == "Chasing Darkness");
+                if (book10005_6 != null)
+                {
+                    order10005.OrderDetails.Add(new OrderDetail
+                    {
+                        BookID = book10005_6.BookID,
+                        Quantity = 1,
+                        Price = 25.95m,
+                        Cost = 9.08m
+                    });
+                }
+
+                db.Orders.Add(order10005);
+            }
 
             // Order 10006
-            OrderData.Add((10006, "Lim Chou", new DateTime(2025, 10, 5), 107.0m, "Ordered", new List<(string, decimal, decimal, int)>
+            var customer10006 = db.Users.FirstOrDefault(u => u.Email == "limchou@gogle.com");
+            if (customer10006 != null)
             {
-                ("The Other Queen", 25.95m, 23.61m, 70),
-                ("Wrecked", 25.0m, 18.0m, 10),
-                ("Reckless", 22.0m, 9.46m, 23),
-            }));
+                Order order10006 = new Order
+                {
+                    OrderNumber = 10006,
+                    CustomerID = customer10006.Id,
+                    OrderDate = new DateTime(2025, 10, 5),
+                    ShippingFee = 107.0m,
+                    OrderStatus = OrderStatusEnum.Pending,
+                    OrderDetails = new List<OrderDetail>()
+                };
+
+                var book10006_7 = db.Books.FirstOrDefault(b => b.Title == "The Other Queen");
+                if (book10006_7 != null)
+                {
+                    order10006.OrderDetails.Add(new OrderDetail
+                    {
+                        BookID = book10006_7.BookID,
+                        Quantity = 70,
+                        Price = 25.95m,
+                        Cost = 23.61m
+                    });
+                }
+
+                var book10006_8 = db.Books.FirstOrDefault(b => b.Title == "Wrecked");
+                if (book10006_8 != null)
+                {
+                    order10006.OrderDetails.Add(new OrderDetail
+                    {
+                        BookID = book10006_8.BookID,
+                        Quantity = 10,
+                        Price = 25.0m,
+                        Cost = 18.0m
+                    });
+                }
+
+                var book10006_9 = db.Books.FirstOrDefault(b => b.Title == "Reckless");
+                if (book10006_9 != null)
+                {
+                    order10006.OrderDetails.Add(new OrderDetail
+                    {
+                        BookID = book10006_9.BookID,
+                        Quantity = 23,
+                        Price = 22.0m,
+                        Cost = 9.46m
+                    });
+                }
+
+                db.Orders.Add(order10006);
+            }
 
             // Order 10007
-            OrderData.Add((10007, "Wendy Chang", new DateTime(2025, 10, 30), 3.5m, "Ordered", new List<(string, decimal, decimal, int)>
+            var customer10007 = db.Users.FirstOrDefault(u => u.Email == "wchang@example.com");
+            if (customer10007 != null)
             {
-                ("The Professional", 26.95m, 7.01m, 1),
-            }));
+                Order order10007 = new Order
+                {
+                    OrderNumber = 10007,
+                    CustomerID = customer10007.Id,
+                    OrderDate = new DateTime(2025, 10, 30),
+                    ShippingFee = 3.5m,
+                    OrderStatus = OrderStatusEnum.Pending,
+                    OrderDetails = new List<OrderDetail>()
+                };
+
+                var book10007_10 = db.Books.FirstOrDefault(b => b.Title == "The Professional");
+                if (book10007_10 != null)
+                {
+                    order10007.OrderDetails.Add(new OrderDetail
+                    {
+                        BookID = book10007_10.BookID,
+                        Quantity = 1,
+                        Price = 26.95m,
+                        Cost = 7.01m
+                    });
+                }
+
+                db.Orders.Add(order10007);
+            }
 
             // Order 10008
-            OrderData.Add((10008, "Jeffrey Hampton", new DateTime(2025, 11, 1), 5.0m, "Ordered", new List<(string, decimal, decimal, int)>
+            var customer10008 = db.Users.FirstOrDefault(u => u.Email == "jeffh@sonic.com");
+            if (customer10008 != null)
             {
-                ("The Professional", 26.95m, 7.01m, 2),
-            }));
+                Order order10008 = new Order
+                {
+                    OrderNumber = 10008,
+                    CustomerID = customer10008.Id,
+                    OrderDate = new DateTime(2025, 11, 1),
+                    ShippingFee = 5.0m,
+                    OrderStatus = OrderStatusEnum.Pending,
+                    OrderDetails = new List<OrderDetail>()
+                };
+
+                var book10008_11 = db.Books.FirstOrDefault(b => b.Title == "The Professional");
+                if (book10008_11 != null)
+                {
+                    order10008.OrderDetails.Add(new OrderDetail
+                    {
+                        BookID = book10008_11.BookID,
+                        Quantity = 2,
+                        Price = 26.95m,
+                        Cost = 7.01m
+                    });
+                }
+
+                db.Orders.Add(order10008);
+            }
 
             // Order 10009
-            OrderData.Add((10009, "Charles Miller", new DateTime(2025, 11, 3), 3.5m, "Ordered", new List<(string, decimal, decimal, int)>
+            var customer10009 = db.Users.FirstOrDefault(u => u.Email == "cmiller@bob.com");
+            if (customer10009 != null)
             {
-                ("Say Goodbye", 25.0m, 11.25m, 1),
-            }));
+                Order order10009 = new Order
+                {
+                    OrderNumber = 10009,
+                    CustomerID = customer10009.Id,
+                    OrderDate = new DateTime(2025, 11, 3),
+                    ShippingFee = 3.5m,
+                    OrderStatus = OrderStatusEnum.Pending,
+                    OrderDetails = new List<OrderDetail>()
+                };
+
+                var book10009_12 = db.Books.FirstOrDefault(b => b.Title == "Say Goodbye");
+                if (book10009_12 != null)
+                {
+                    order10009.OrderDetails.Add(new OrderDetail
+                    {
+                        BookID = book10009_12.BookID,
+                        Quantity = 1,
+                        Price = 25.0m,
+                        Cost = 11.25m
+                    });
+                }
+
+                db.Orders.Add(order10009);
+            }
 
             // Order 10010
-            OrderData.Add((10010, "Ernest Lowe", new DateTime(2025, 11, 2), 6.5m, "Ordered", new List<(string, decimal, decimal, int)>
+            var customer10010 = db.Users.FirstOrDefault(u => u.Email == "elowe@netscare.net");
+            if (customer10010 != null)
             {
-                ("Wrecked", 25.0m, 18.0m, 3),
-                ("Reckless", 22.0m, 9.46m, 11),
-            }));
+                Order order10010 = new Order
+                {
+                    OrderNumber = 10010,
+                    CustomerID = customer10010.Id,
+                    OrderDate = new DateTime(2025, 11, 2),
+                    ShippingFee = 6.5m,
+                    OrderStatus = OrderStatusEnum.Pending,
+                    OrderDetails = new List<OrderDetail>()
+                };
+
+                var book10010_13 = db.Books.FirstOrDefault(b => b.Title == "Wrecked");
+                if (book10010_13 != null)
+                {
+                    order10010.OrderDetails.Add(new OrderDetail
+                    {
+                        BookID = book10010_13.BookID,
+                        Quantity = 3,
+                        Price = 25.0m,
+                        Cost = 18.0m
+                    });
+                }
+
+                var book10010_14 = db.Books.FirstOrDefault(b => b.Title == "Reckless");
+                if (book10010_14 != null)
+                {
+                    order10010.OrderDetails.Add(new OrderDetail
+                    {
+                        BookID = book10010_14.BookID,
+                        Quantity = 11,
+                        Price = 22.0m,
+                        Cost = 9.46m
+                    });
+                }
+
+                db.Orders.Add(order10010);
+            }
 
             // Order 10011
-            OrderData.Add((10011, "Kelly Nelson", new DateTime(2025, 1, 1), 0.0m, "InCart", new List<(string, decimal, decimal, int)>
+            var customer10011 = db.Users.FirstOrDefault(u => u.Email == "knelson@aoll.com");
+            if (customer10011 != null)
             {
-                ("The Cast", 21.95m, 12.95m, 1),
-            }));
+                Order order10011 = new Order
+                {
+                    OrderNumber = 10011,
+                    CustomerID = customer10011.Id,
+                    OrderDate = DateTime.Now,
+                    ShippingFee = 0.0m,
+                    OrderStatus = OrderStatusEnum.Pending,
+                    OrderDetails = new List<OrderDetail>()
+                };
+
+                var book10011_15 = db.Books.FirstOrDefault(b => b.Title == "The Cast");
+                if (book10011_15 != null)
+                {
+                    order10011.OrderDetails.Add(new OrderDetail
+                    {
+                        BookID = book10011_15.BookID,
+                        Quantity = 1,
+                        Price = 21.95m,
+                        Cost = 12.95m
+                    });
+                }
+
+                db.Orders.Add(order10011);
+            }
 
             // Order 10012
-            OrderData.Add((10012, "Chuck Luce", new DateTime(2025, 1, 1), 0.0m, "InCart", new List<(string, decimal, decimal, int)>
+            var customer10012 = db.Users.FirstOrDefault(u => u.Email == "cluce@gogle.com");
+            if (customer10012 != null)
             {
-                ("Brooklyn", 18.95m, 3.6m, 4),
-            }));
+                Order order10012 = new Order
+                {
+                    OrderNumber = 10012,
+                    CustomerID = customer10012.Id,
+                    OrderDate = DateTime.Now,
+                    ShippingFee = 0.0m,
+                    OrderStatus = OrderStatusEnum.Pending,
+                    OrderDetails = new List<OrderDetail>()
+                };
+
+                var book10012_16 = db.Books.FirstOrDefault(b => b.Title == "Brooklyn");
+                if (book10012_16 != null)
+                {
+                    order10012.OrderDetails.Add(new OrderDetail
+                    {
+                        BookID = book10012_16.BookID,
+                        Quantity = 1,
+                        Price = 18.95m,
+                        Cost = 3.6m
+                    });
+                }
+
+                db.Orders.Add(order10012);
+            }
 
             // Order 10013
-            OrderData.Add((10013, "Eryn Rice", new DateTime(2025, 1, 1), 0.0m, "InCart", new List<(string, decimal, decimal, int)>
+            var customer10013 = db.Users.FirstOrDefault(u => u.Email == "erynrice@aoll.com");
+            if (customer10013 != null)
             {
-                ("Dexter By Design", 25.0m, 2.75m, 1),
-                ("The Midnight House", 25.95m, 3.11m, 3),
-            }));
-
-            // Create orders and order details
-            foreach (var orderData in OrderData)
-            {
-                // Find customer by name
-                var customer = db.Users.FirstOrDefault(u =>
-                    (u.FirstName + " " + u.LastName) == orderData.Item2);
-
-                if (customer != null)
+                Order order10013 = new Order
                 {
-                    // Determine order status
-                    OrderStatusEnum status;
-                    switch (orderData.Item5.ToLower())
-                    {
-                        case "shipped":
-                            status = OrderStatusEnum.Shipped;
-                            break;
-                        case "delivered":
-                            status = OrderStatusEnum.Delivered;
-                            break;
-                        case "pending":
-                            status = OrderStatusEnum.Pending;
-                            break;
-                        case "cancelled":
-                            status = OrderStatusEnum.Cancelled;
-                            break;
-                        default:
-                            status = OrderStatusEnum.Shipped;
-                            break;
-                    }
+                    OrderNumber = 10013,
+                    CustomerID = customer10013.Id,
+                    OrderDate = DateTime.Now,
+                    ShippingFee = 0.0m,
+                    OrderStatus = OrderStatusEnum.Pending,
+                    OrderDetails = new List<OrderDetail>()
+                };
 
-                    Order order = new Order
+                var book10013_17 = db.Books.FirstOrDefault(b => b.Title == "Dexter By Design");
+                if (book10013_17 != null)
+                {
+                    order10013.OrderDetails.Add(new OrderDetail
                     {
-                        CustomerID = customer.Id,
-                        OrderDate = orderData.Item3,
-                        ShippingFee = orderData.Item4,
-                        OrderStatus = status,
-                        OrderDetails = new List<OrderDetail>()
-                    };
-
-                    // Add order details
-                    foreach (var item in orderData.Item6)
-                    {
-                        var book = db.Books.FirstOrDefault(b => b.Title == item.Item1);
-                        if (book != null)
-                        {
-                            OrderDetail detail = new OrderDetail
-                            {
-                                BookID = book.BookID,
-                                Quantity = item.Item4,
-                                Price = item.Item2,
-                                Cost = item.Item3
-                            };
-                            order.OrderDetails.Add(detail);
-                        }
-                    }
-
-                    db.Orders.Add(order);
+                        BookID = book10013_17.BookID,
+                        Quantity = 1,
+                        Price = 25.0m,
+                        Cost = 2.75m
+                    });
                 }
+
+                var book10013_18 = db.Books.FirstOrDefault(b => b.Title == "The Midnight House");
+                if (book10013_18 != null)
+                {
+                    order10013.OrderDetails.Add(new OrderDetail
+                    {
+                        BookID = book10013_18.BookID,
+                        Quantity = 3,
+                        Price = 25.95m,
+                        Cost = 3.11m
+                    });
+                }
+
+                db.Orders.Add(order10013);
             }
 
             db.SaveChanges();

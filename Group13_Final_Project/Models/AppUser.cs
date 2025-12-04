@@ -5,6 +5,9 @@ namespace Group13_Final_Project.Models
 {
     public class AppUser : IdentityUser
     {
+        [Display(Name = "Customer Number")]
+        public Int32? CustomerNumber { get; set; }
+
         [Display(Name = "First Name")]
         [Required(ErrorMessage = "First name is required")]
         public String FirstName { get; set; }

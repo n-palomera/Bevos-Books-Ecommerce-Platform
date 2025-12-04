@@ -31,7 +31,7 @@ namespace Group13_Final_Project.Seeding
                     Status = true
                 },
                 Password = "dewey4",
-                RoleName = "Employee"
+                RoleName = "Manager"
             });
 
             Employees.Add(new AddUserModel
@@ -373,7 +373,7 @@ namespace Group13_Final_Project.Seeding
                     Status = true
                 },
                 Password = "arched",
-                RoleName = "Employee"
+                RoleName = "Manager"
             });
 
             Employees.Add(new AddUserModel
@@ -392,7 +392,7 @@ namespace Group13_Final_Project.Seeding
                     Status = true
                 },
                 Password = "lottery",
-                RoleName = "Employee"
+                RoleName = "Manager"
             });
 
             Employees.Add(new AddUserModel
@@ -430,7 +430,7 @@ namespace Group13_Final_Project.Seeding
                     Status = true
                 },
                 Password = "offbeat",
-                RoleName = "Employee"
+                RoleName = "Manager"
             });
 
             Employees.Add(new AddUserModel
@@ -544,7 +544,7 @@ namespace Group13_Final_Project.Seeding
                     Status = true
                 },
                 Password = "landus",
-                RoleName = "Employee"
+                RoleName = "Manager"
             });
 
             // UPSERT: Add or update each employee

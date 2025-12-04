@@ -18,6 +18,9 @@ namespace Group13_Final_Project.Models
         [Key]
         public Int32 OrderID { get; set; }
 
+        [Display(Name = "Order Number")]
+        public Int32 OrderNumber { get; set; }
+
         [Required(ErrorMessage = "Order date is required")]
         [Display(Name = "Order Date")]
         [DataType(DataType.Date)]
