@@ -1,0 +1,79 @@
+﻿@model RecommendationsViewModel
+
+@{
+    ViewData["Title"] = "Book Recommendations";
+}
+
+<div class="container">
+    <h1>Recommended Books for You</h1>
+    <p class="lead">Based on your recent order #@Model.OrderID</p>
+
+    <hr />
+
+    @if (Model.RecommendedBooks != null && Model.RecommendedBooks.Any())
+    {
+        <div class="row">
+            @foreach (var book in Model.RecommendedBooks)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">@book.Title</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">by @book.Authors</h6>
+
+                            <p class="card-text">
+                                <strong>Genre:</strong> @book.Genre.GenreName<br />
+                                <strong>Price:</strong> @book.Price.ToString("C")<br />
+                                @if (book.AverageRating > 0)
+                                {
+                                    <strong>Rating:</strong>
+                                    <span class="text-warning">
+                                        @for (int i = 0; i < (int)book.AverageRating; i++)
+                                        {
+                                            <span>★</span>
+                                        }
+                                        @for (int i = (int)book.AverageRating; i < 5; i++)
+                                        {
+                                            <span>☆</span>
+                                        }
+                                    </span>
+                                    <span>(@Math.Round(book.AverageRating, 1))</span>
+                                    }
+                                    else
+                                    {
+                                    <span class="text-muted">No ratings yet</span>
+                                }
+                            </p>
+
+                            @if (book.InStock)
+                            {
+                                <span class="badge badge-success">In Stock</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-danger">Out of Stock</span>
+                            }
+                        </div>
+                        <div class="card-footer">
+                            <a asp-controller="Books" asp-action="Details" asp-route-id="@book.BookID" class="btn btn-primary btn-block">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <h5>No recommendations available at this time</h5>
+            <p>Check back later for personalized book recommendations!</p>
+        </div>
+    }
+
+    <div class="mt-4">
+        <a asp-action="OrderHistory" class="btn btn-secondary">Back to Order History</a>
+        <a asp-controller="Books" asp-action="Index" class="btn btn-primary">Browse All Books</a>
+    </div>
+</div>

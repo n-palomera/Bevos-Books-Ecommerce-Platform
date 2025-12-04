@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Group13_Final_Project.DAL;
 using Group13_Final_Project.Models;
 using Group13_Final_Project.Utilities;
 using System;
+using System.Linq;
 
 namespace Group13_Final_Project.Controllers
 {
@@ -21,7 +23,6 @@ namespace Group13_Final_Project.Controllers
             _context = appDbContext;
             _userManager = userManager;
             _signInManager = signIn;
-            //user manager only has one password validator
             _passwordValidator = (PasswordValidator<AppUser>)userManager.PasswordValidators.FirstOrDefault();
         }
 
@@ -38,59 +39,51 @@ namespace Group13_Final_Project.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Register(RegisterViewModel rvm)
         {
-            //if registration data is valid, create a new user on the database
             if (ModelState.IsValid == false)
             {
-                //this is the sad path - something went wrong, 
-                //return the user to the register page to try again
                 return View(rvm);
             }
 
-            //this code maps the RegisterViewModel to the AppUser domain model
+            // Map RegisterViewModel to AppUser
             AppUser newUser = new AppUser
             {
                 UserName = rvm.Email,
                 Email = rvm.Email,
                 PhoneNumber = rvm.PhoneNumber,
-
-                //TODO: Add the rest of the custom user fields here
-                //FirstName is included as an example
                 FirstName = rvm.FirstName,
-
+                LastName = rvm.LastName,
+                Address = rvm.Address,
+                City = rvm.City,
+                State = rvm.State,
+                ZipCode = rvm.ZipCode,
+                Birthday = rvm.Birthday,
+                Status = true
             };
 
-            //create AddUserModel
             AddUserModel aum = new AddUserModel()
             {
                 User = newUser,
                 Password = rvm.Password,
-
-                //TODO: You will need to change this value if you want to 
-                //add the user to a different role - just specify the role name.
                 RoleName = "Customer"
             };
 
-            //This code uses the AddUser utility to create a new user with the specified password
             IdentityResult result = await Utilities.AddUser.AddUserWithRoleAsync(aum, _userManager, _context);
 
-            if (result.Succeeded) //everything is okay
+            if (result.Succeeded)
             {
-                //NOTE: This code logs the user into the account that they just created
-                //You may or may not want to log a user in directly after they register - check
-                //the business rules!
+                // TODO: Send welcome email here
+
+                // Sign in the new user
                 Microsoft.AspNetCore.Identity.SignInResult result2 = await _signInManager.PasswordSignInAsync(rvm.Email, rvm.Password, false, lockoutOnFailure: false);
 
-                //Send the user to the home page
                 return RedirectToAction("Index", "Home");
             }
-            else  //the add user operation didn't work, and we need to show an error message
+            else
             {
                 foreach (IdentityError error in result.Errors)
                 {
                     ModelState.AddModelError("", error.Description);
                 }
-
-                //send user back to page with errors
                 return View(rvm);
             }
         }
@@ -99,12 +92,12 @@ namespace Group13_Final_Project.Controllers
         [AllowAnonymous]
         public IActionResult Login(string returnUrl)
         {
-            if (User.Identity.IsAuthenticated) //user has been redirected here from a page they're not authorized to see
+            if (User.Identity.IsAuthenticated)
             {
                 return View("Error", new string[] { "Access Denied" });
             }
-            _signInManager.SignOutAsync(); //this removes any old cookies hanging around
-            ViewBag.ReturnUrl = returnUrl; //pass along the page the user should go back to
+            _signInManager.SignOutAsync();
+            ViewBag.ReturnUrl = returnUrl;
             return View();
         }
 
@@ -114,28 +107,28 @@ namespace Group13_Final_Project.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Login(LoginViewModel lvm, string returnUrl)
         {
-            //if user forgot to include user name or password,
-            //send them back to the login page to try again
             if (ModelState.IsValid == false)
             {
                 return View(lvm);
             }
 
-            //attempt to sign the user in using the SignInManager
+            // Check if user account is disabled
+            AppUser user = await _userManager.FindByEmailAsync(lvm.Email);
+            if (user != null && !user.Status)
+            {
+                ModelState.AddModelError("", "Your account has been disabled. Please contact support.");
+                return View(lvm);
+            }
+
             Microsoft.AspNetCore.Identity.SignInResult result = await _signInManager.PasswordSignInAsync(lvm.Email, lvm.Password, lvm.RememberMe, lockoutOnFailure: false);
 
-            //if the login worked, take the user to either the url
-            //they requested OR the homepage if there isn't a specific url
             if (result.Succeeded)
             {
-                //return ?? "/" means if returnUrl is null, substitute "/" (home)
                 return Redirect(returnUrl ?? "/");
             }
-            else //log in was not successful
+            else
             {
-                //add an error to the model to show invalid attempt
                 ModelState.AddModelError("", "Invalid login attempt.");
-                //send user back to login page to try again
                 return View(lvm);
             }
         }
@@ -145,75 +138,318 @@ namespace Group13_Final_Project.Controllers
             return View("Error", new string[] { "You are not authorized for this resource" });
         }
 
-        //GET: Account/Index
-        public IActionResult Index()
+        // GET: Account/Index
+        public async Task<IActionResult> Index()
         {
             IndexViewModel ivm = new IndexViewModel();
 
-            //get user info
             String id = User.Identity.Name;
-            AppUser user = _context.Users.FirstOrDefault(u => u.UserName == id);
+            AppUser user = await _context.Users
+                .Include(u => u.Cards)
+                .FirstOrDefaultAsync(u => u.UserName == id);
 
-            //populate the view model
-            //(i.e. map the domain model to the view model)
+            if (user == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            // Populate the view model
             ivm.Email = user.Email;
             ivm.HasPassword = true;
             ivm.UserID = user.Id;
             ivm.UserName = user.UserName;
+            ivm.FirstName = user.FirstName;
+            ivm.LastName = user.LastName;
+            ivm.PhoneNumber = user.PhoneNumber;
+            ivm.Address = user.Address;
+            ivm.City = user.City;
+            ivm.State = user.State;
+            ivm.ZipCode = user.ZipCode;
+            ivm.Birthday = user.Birthday;
+            ivm.CardCount = user.Cards?.Count ?? 0;
 
-            //send data to the view
             return View(ivm);
         }
 
+        // GET: Account/Edit
+        public async Task<IActionResult> Edit()
+        {
+            String id = User.Identity.Name;
+            AppUser user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == id);
 
+            if (user == null)
+            {
+                return RedirectToAction("Login");
+            }
 
-        //Logic for change password
+            EditProfileViewModel epvm = new EditProfileViewModel
+            {
+                UserID = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Address = user.Address,
+                City = user.City,
+                State = user.State,
+                ZipCode = user.ZipCode,
+                PhoneNumber = user.PhoneNumber,
+                Birthday = user.Birthday,
+                Email = user.Email
+            };
+
+            return View(epvm);
+        }
+
+        // POST: Account/Edit
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(EditProfileViewModel epvm)
+        {
+            if (ModelState.IsValid == false)
+            {
+                return View(epvm);
+            }
+
+            AppUser user = await _context.Users.FirstOrDefaultAsync(u => u.Id == epvm.UserID);
+
+            if (user == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            // Update allowed fields (email cannot be changed per requirements)
+            user.FirstName = epvm.FirstName;
+            user.LastName = epvm.LastName;
+            user.Address = epvm.Address;
+            user.City = epvm.City;
+            user.State = epvm.State;
+            user.ZipCode = epvm.ZipCode;
+            user.PhoneNumber = epvm.PhoneNumber;
+            user.Birthday = epvm.Birthday;
+
+            _context.Update(user);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Index");
+        }
+
         // GET: /Account/ChangePassword
         public ActionResult ChangePassword()
         {
             return View();
         }
 
-
-
         // POST: /Account/ChangePassword
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> ChangePassword(ChangePasswordViewModel cpvm)
         {
-            //if user forgot a field, send them back to 
-            //change password page to try again
             if (ModelState.IsValid == false)
             {
                 return View(cpvm);
             }
 
-            //Find the logged in user using the UserManager
             AppUser userLoggedIn = await _userManager.FindByNameAsync(User.Identity.Name);
-
-            //Attempt to change the password using the UserManager
             var result = await _userManager.ChangePasswordAsync(userLoggedIn, cpvm.OldPassword, cpvm.NewPassword);
 
-            //if the attempt to change the password worked
             if (result.Succeeded)
             {
-                //sign in the user with the new password
-                await _signInManager.SignInAsync(userLoggedIn, isPersistent: false);
+                // TODO: Send password change confirmation email here
 
-                //send the user back to the home page
+                await _signInManager.SignInAsync(userLoggedIn, isPersistent: false);
                 return RedirectToAction("Index", "Home");
             }
-            else //attempt to change the password didn't work
+            else
             {
-                //Add all the errors from the result to the model state
                 foreach (var error in result.Errors)
                 {
                     ModelState.AddModelError("", error.Description);
                 }
-
-                //send the user back to the change password page to try again
                 return View(cpvm);
             }
+        }
+
+        // GET: Account/OrderHistory
+        public async Task<IActionResult> OrderHistory(DateTime? startDate, DateTime? endDate, string statusFilter)
+        {
+            String username = User.Identity.Name;
+            AppUser user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == username);
+
+            if (user == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            var ordersQuery = _context.Orders
+                .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Book)
+                .Include(o => o.Card)
+                .Include(o => o.Coupon)
+                .Where(o => o.CustomerID == user.Id);
+
+            // Apply date filters
+            if (startDate.HasValue)
+            {
+                ordersQuery = ordersQuery.Where(o => o.OrderDate >= startDate.Value);
+            }
+
+            if (endDate.HasValue)
+            {
+                ordersQuery = ordersQuery.Where(o => o.OrderDate <= endDate.Value);
+            }
+
+            // Apply status filter
+            if (!string.IsNullOrEmpty(statusFilter) && Enum.TryParse<OrderStatusEnum>(statusFilter, out var status))
+            {
+                ordersQuery = ordersQuery.Where(o => o.OrderStatus == status);
+            }
+
+            var orders = await ordersQuery.OrderByDescending(o => o.OrderDate).ToListAsync();
+
+            OrderHistoryViewModel ohvm = new OrderHistoryViewModel
+            {
+                Orders = orders,
+                StartDate = startDate,
+                EndDate = endDate,
+                StatusFilter = statusFilter
+            };
+
+            return View(ohvm);
+        }
+
+        // GET: Account/MyCards
+        public async Task<IActionResult> MyCards()
+        {
+            String username = User.Identity.Name;
+            AppUser user = await _context.Users
+                .Include(u => u.Cards)
+                .FirstOrDefaultAsync(u => u.UserName == username);
+
+            if (user == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            return View(user.Cards);
+        }
+
+        // GET: Account/Recommendations
+        public async Task<IActionResult> Recommendations(int orderId)
+        {
+            var order = await _context.Orders
+                .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Book)
+                        .ThenInclude(b => b.Genre)
+                .FirstOrDefaultAsync(o => o.OrderID == orderId);
+
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            // Get the first book from the order for recommendations
+            var purchasedBook = order.OrderDetails.FirstOrDefault()?.Book;
+
+            if (purchasedBook == null)
+            {
+                return RedirectToAction("OrderHistory");
+            }
+
+            // Get customer's purchase history
+            String username = User.Identity.Name;
+            AppUser user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == username);
+
+            var customerBookIds = await _context.OrderDetails
+                .Where(od => od.Order.CustomerID == user.Id)
+                .Select(od => od.BookID)
+                .Distinct()
+                .ToListAsync();
+
+            List<Book> recommendations = new List<Book>();
+
+            // 1. Same author, same genre, not purchased
+            var sameAuthorGenre = await _context.Books
+                .Include(b => b.Reviews)
+                .Where(b => b.Authors == purchasedBook.Authors
+                    && b.GenreID == purchasedBook.GenreID
+                    && b.BookID != purchasedBook.BookID
+                    && !customerBookIds.Contains(b.BookID)
+                    && b.BookStatus == BookStatusEnum.Active)
+                .OrderByDescending(b => b.AverageRating)
+                .FirstOrDefaultAsync();
+
+            if (sameAuthorGenre != null)
+            {
+                recommendations.Add(sameAuthorGenre);
+            }
+
+            // 2. Highly rated books in same genre (rating >= 4.0)
+            int needed = 3 - recommendations.Count;
+            if (needed > 0)
+            {
+                var highlyRated = await _context.Books
+                    .Include(b => b.Reviews)
+                    .Where(b => b.GenreID == purchasedBook.GenreID
+                        && b.BookID != purchasedBook.BookID
+                        && !customerBookIds.Contains(b.BookID)
+                        && !recommendations.Select(r => r.BookID).Contains(b.BookID)
+                        && b.BookStatus == BookStatusEnum.Active)
+                    .ToListAsync();
+
+                var highRatedFiltered = highlyRated
+                    .Where(b => b.AverageRating >= 4.0m)
+                    .GroupBy(b => b.Authors)
+                    .Select(g => g.OrderByDescending(b => b.AverageRating).First())
+                    .Take(needed)
+                    .ToList();
+
+                recommendations.AddRange(highRatedFiltered);
+            }
+
+            // 3. Low/no rating in same genre
+            needed = 3 - recommendations.Count;
+            if (needed > 0)
+            {
+                var lowRated = await _context.Books
+                    .Include(b => b.Reviews)
+                    .Where(b => b.GenreID == purchasedBook.GenreID
+                        && b.BookID != purchasedBook.BookID
+                        && !customerBookIds.Contains(b.BookID)
+                        && !recommendations.Select(r => r.BookID).Contains(b.BookID)
+                        && b.BookStatus == BookStatusEnum.Active)
+                    .OrderBy(b => b.AverageRating)
+                    .Take(needed)
+                    .ToListAsync();
+
+                recommendations.AddRange(lowRated);
+            }
+
+            // 4. Highest rated books overall
+            needed = 3 - recommendations.Count;
+            if (needed > 0)
+            {
+                var anyHighRated = await _context.Books
+                    .Include(b => b.Reviews)
+                    .Where(b => b.BookID != purchasedBook.BookID
+                        && !customerBookIds.Contains(b.BookID)
+                        && !recommendations.Select(r => r.BookID).Contains(b.BookID)
+                        && b.BookStatus == BookStatusEnum.Active)
+                    .ToListAsync();
+
+                var topRated = anyHighRated
+                    .OrderByDescending(b => b.AverageRating)
+                    .Take(needed)
+                    .ToList();
+
+                recommendations.AddRange(topRated);
+            }
+
+            RecommendationsViewModel rvm = new RecommendationsViewModel
+            {
+                OrderID = orderId,
+                RecommendedBooks = recommendations.Take(3).ToList()
+            };
+
+            return View(rvm);
         }
 
         // POST: /Account/LogOff
@@ -221,10 +457,7 @@ namespace Group13_Final_Project.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult LogOff()
         {
-            //sign the user out of the application
             _signInManager.SignOutAsync();
-
-            //send the user back to the home page
             return RedirectToAction("Index", "Home");
         }
     }

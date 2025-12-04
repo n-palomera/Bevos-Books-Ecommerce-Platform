@@ -1,0 +1,88 @@
+﻿@model IEnumerable<Card>
+
+@{
+    ViewData["Title"] = "My Credit Cards";
+}
+
+<h1>My Credit Cards</h1>
+<p class="lead">Manage your payment methods</p>
+
+<hr />
+
+@if (Model != null && Model.Any())
+{
+    <p><strong>You have @Model.Count() card(s) on file (Maximum: 3)</strong></p>
+
+    <div class="row">
+        @foreach (var card in Model)
+        {
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            @switch (card.CardType)
+                            {
+                                case CardTypeEnum.Visa:
+                                    <span class="badge badge-primary">Visa</span>
+                                    break;
+                                case CardTypeEnum.MasterCard:
+                                    <span class="badge badge-warning">MasterCard</span>
+                                    break;
+                                case CardTypeEnum.AmericanExpress:
+                                    <span class="badge badge-info">American Express</span>
+                                    break;
+                                case CardTypeEnum.Discover:
+                                    <span class="badge badge-success">Discover</span>
+                                    break;
+                            }
+                        </h5>
+                        <p class="card-text">
+                            <strong>Card Number:</strong><br />
+                            ************@card.CardNumber.Substring(card.CardNumber.Length - 4)
+                        </p>
+                        <div class="btn-group" role="group">
+                            <a asp-controller="Cards" asp-action="Edit" asp-route-id="@card.CardID" class="btn btn-sm btn-primary">Edit</a>
+                            <a asp-controller="Cards" asp-action="Delete" asp-route-id="@card.CardID" class="btn btn-sm btn-danger">Remove</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (Model.Count() < 3)
+    {
+        <div class="mt-3">
+            <a asp-controller="Cards" asp-action="Create" class="btn btn-success">Add New Card</a>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning mt-3">
+            You have reached the maximum of 3 credit cards. Please remove a card before adding a new one.
+        </div>
+    }
+}
+else
+{
+    <div class="alert alert-info">
+        <h5>No credit cards on file</h5>
+        <p>Add a credit card to make checkout faster and easier!</p>
+        <a asp-controller="Cards" asp-action="Create" class="btn btn-success">Add Your First Card</a>
+    </div>
+}
+
+<div class="mt-4">
+    <a asp-action="Index" class="btn btn-secondary">Back to Account</a>
+</div>
+
+<style>
+    .card {
+        transition: transform 0.2s;
+    }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+</style>
