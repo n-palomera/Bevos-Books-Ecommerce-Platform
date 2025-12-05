@@ -128,6 +128,33 @@ namespace Group13_Final_Project.Controllers
                 return NotFound();
             }
 
+            // Check if logged-in user can write a review
+            ViewData["CanReview"] = false;
+            ViewData["HasReviewed"] = false;
+            ViewData["HasPurchased"] = false;
+
+            if (User.Identity?.IsAuthenticated == true && User.IsInRole("Customer"))
+            {
+                var username = User.Identity.Name;
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == username);
+
+                if (user != null)
+                {
+                    // Check if user has purchased this book
+                    var hasPurchased = await _context.OrderDetails
+                        .AnyAsync(od => od.BookID == id && od.Order.CustomerID == user.Id);
+                    ViewData["HasPurchased"] = hasPurchased;
+
+                    // Check if user has already reviewed this book
+                    var hasReviewed = await _context.Reviews
+                        .AnyAsync(r => r.BookID == id && r.ReviewerID == user.Id);
+                    ViewData["HasReviewed"] = hasReviewed;
+
+                    // User can review if purchased and not yet reviewed
+                    ViewData["CanReview"] = hasPurchased && !hasReviewed;
+                }
+            }
+
             return View(book);
         }
     }

@@ -6,6 +6,22 @@
 
 <h1>All Reviews</h1>
 
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
 <form asp-action="Index" method="get" class="mb-4">
     <div class="row">
         <div class="col-md-5">
@@ -48,6 +64,7 @@
                 <th>Rating</th>
                 <th>Review Text</th>
                 <th>Status</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -65,9 +82,9 @@
                     <td>
                         @if (!string.IsNullOrEmpty(review.ReviewText))
                         {
-                            if (review.ReviewText.Length > 100)
+                            if (review.ReviewText.Length > 50)
                             {
-                                @review.ReviewText.Substring(0, 100)
+                                @review.ReviewText.Substring(0, 50)
                                 <text>...</text>
                             }
                             else
@@ -84,15 +101,37 @@
                         @switch (review.DisputeStatus)
                         {
                             case Group13_Final_Project.Models.DisputeStatusEnum.Approved:
-                                <span class="badge badge-success">Approved</span>
+                                <span class="badge bg-success">Approved</span>
                                 break;
                             case Group13_Final_Project.Models.DisputeStatusEnum.Pending:
-                                <span class="badge badge-warning">Pending</span>
+                                <span class="badge bg-warning text-dark">Pending</span>
                                 break;
                             case Group13_Final_Project.Models.DisputeStatusEnum.Rejected:
-                                <span class="badge badge-danger">Rejected</span>
+                                <span class="badge bg-danger">Rejected</span>
                                 break;
                         }
+                    </td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            @if (review.DisputeStatus == Group13_Final_Project.Models.DisputeStatusEnum.Pending)
+                            {
+                                <form asp-action="Approve" asp-route-id="@review.ReviewID" method="post" style="display:inline;">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-success" title="Approve">
+                                        <i class="bi bi-check-lg"></i>
+                                    </button>
+                                </form>
+                                <form asp-action="Reject" asp-route-id="@review.ReviewID" method="post" style="display:inline;">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-danger" title="Reject">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </form>
+                            }
+                            <a asp-action="Edit" asp-route-id="@review.ReviewID" class="btn btn-sm btn-primary" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        </div>
                     </td>
                 </tr>
             }

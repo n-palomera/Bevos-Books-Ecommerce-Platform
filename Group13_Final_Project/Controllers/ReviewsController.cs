@@ -203,5 +203,139 @@ namespace Group13_Final_Project.Controllers
 
             return View(reviews);
         }
+
+        // POST: Reviews/Approve/5 (Employee approves a review)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Employee,Admin")]
+        public async Task<IActionResult> Approve(int id)
+        {
+            var review = await _context.Reviews.FindAsync(id);
+
+            if (review == null)
+            {
+                return NotFound();
+            }
+
+            // Get current employee
+            var username = User.Identity.Name;
+            var employee = await _context.Users.FirstOrDefaultAsync(u => u.UserName == username);
+
+            review.DisputeStatus = DisputeStatusEnum.Approved;
+            review.ApproverID = employee?.Id;
+
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Review has been approved.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        // POST: Reviews/Reject/5 (Employee rejects a review)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Employee,Admin")]
+        public async Task<IActionResult> Reject(int id)
+        {
+            var review = await _context.Reviews.FindAsync(id);
+
+            if (review == null)
+            {
+                return NotFound();
+            }
+
+            // Get current employee
+            var username = User.Identity.Name;
+            var employee = await _context.Users.FirstOrDefaultAsync(u => u.UserName == username);
+
+            review.DisputeStatus = DisputeStatusEnum.Rejected;
+            review.ApproverID = employee?.Id;
+
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Review has been rejected.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        // GET: Reviews/Edit/5 (Employee edits review text - NOT rating)
+        [Authorize(Roles = "Employee,Admin")]
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var review = await _context.Reviews
+                .Include(r => r.Book)
+                .Include(r => r.Reviewer)
+                .FirstOrDefaultAsync(r => r.ReviewID == id);
+
+            if (review == null)
+            {
+                return NotFound();
+            }
+
+            var viewModel = new EditReviewViewModel
+            {
+                ReviewID = review.ReviewID,
+                BookTitle = review.Book?.Title,
+                BookAuthor = review.Book?.Authors,
+                ReviewerName = $"{review.Reviewer?.FirstName} {review.Reviewer?.LastName}",
+                Rating = review.Rating,
+                ReviewText = review.ReviewText,
+                DisputeStatus = review.DisputeStatus
+            };
+
+            return View(viewModel);
+        }
+
+        // POST: Reviews/Edit/5 (Employee submits edited review text)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Employee,Admin")]
+        public async Task<IActionResult> Edit(int id, EditReviewViewModel viewModel)
+        {
+            if (id != viewModel.ReviewID)
+            {
+                return NotFound();
+            }
+
+            var review = await _context.Reviews.FindAsync(id);
+
+            if (review == null)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                // Get current employee
+                var username = User.Identity.Name;
+                var employee = await _context.Users.FirstOrDefaultAsync(u => u.UserName == username);
+
+                // Only update the review text - NOT the rating
+                review.ReviewText = viewModel.ReviewText;
+                review.DisputeStatus = viewModel.DisputeStatus;
+                review.ApproverID = employee?.Id;
+
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] = "Review has been updated.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Reload book/reviewer info if validation fails
+            var fullReview = await _context.Reviews
+                .Include(r => r.Book)
+                .Include(r => r.Reviewer)
+                .FirstOrDefaultAsync(r => r.ReviewID == id);
+
+            viewModel.BookTitle = fullReview?.Book?.Title;
+            viewModel.BookAuthor = fullReview?.Book?.Authors;
+            viewModel.ReviewerName = $"{fullReview?.Reviewer?.FirstName} {fullReview?.Reviewer?.LastName}";
+            viewModel.Rating = fullReview?.Rating ?? 0;
+
+            return View(viewModel);
+        }
     }
 }

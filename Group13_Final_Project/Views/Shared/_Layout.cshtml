@@ -97,6 +97,22 @@
                 </ul>
 
                 <ul class="navbar-nav ms-auto">
+                    @* Shopping Cart - visible to all users *@
+                    <li class="nav-item me-2">
+                        <a asp-controller="ShoppingCart" asp-action="Index" class="nav-link position-relative">
+                            <i class="bi bi-cart3 fs-5"></i>
+                            @{
+                                var cartItemCount = Context.Session.GetCart().TotalItems;
+                            }
+                            @if (cartItemCount > 0)
+                            {
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    @cartItemCount
+                                </span>
+                            }
+                        </a>
+                    </li>
+
                     @if (User.Identity.IsAuthenticated)
                     {
                         @if (User.IsInRole("Customer"))

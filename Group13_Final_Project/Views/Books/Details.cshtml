@@ -6,6 +6,22 @@
 
 <h1>@Model.Title</h1>
 
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle"></i> @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle"></i> @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
 <div class="row">
     <div class="col-md-8">
         <div class="card mb-4">
@@ -53,17 +69,53 @@
 
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title">Reviews and Ratings</h5>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="card-title mb-0">Reviews and Ratings</h5>
+                    @if ((bool)ViewData["CanReview"])
+                    {
+                        <a asp-controller="Reviews" asp-action="Create" asp-route-id="@Model.BookID" class="btn btn-sm btn-primary">
+                            <i class="bi bi-pencil-square"></i> Write a Review
+                        </a>
+                    }
+                </div>
 
                 @if (Model.AverageRating > 0)
                 {
                     <p>
-                        <strong>Rating: @Model.AverageRating.ToString("F1") / 5.0</strong> ⭐
+                        <strong>Rating: @Model.AverageRating.ToString("F1") / 5.0</strong>
+                        <span class="text-warning">
+                            @for (int i = 0; i < (int)Math.Round(Model.AverageRating); i++)
+                            {
+                                <span>&#9733;</span>
+                            }
+                            @for (int i = (int)Math.Round(Model.AverageRating); i < 5; i++)
+                            {
+                                <span>&#9734;</span>
+                            }
+                        </span>
                     </p>
                 }
                 else
                 {
                     <p class="text-muted">No ratings yet</p>
+                }
+
+                @* Show review status messages for logged-in customers *@
+                @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Customer"))
+                {
+                    if ((bool)ViewData["HasReviewed"])
+                    {
+                        <div class="alert alert-info py-2">
+                            <i class="bi bi-check-circle"></i> You have already reviewed this book.
+                            <a asp-controller="Reviews" asp-action="MyReviews">View your reviews</a>
+                        </div>
+                    }
+                    else if (!(bool)ViewData["HasPurchased"])
+                    {
+                        <div class="alert alert-secondary py-2">
+                            <i class="bi bi-info-circle"></i> Purchase this book to write a review.
+                        </div>
+                    }
                 }
 
                 @{
@@ -79,6 +131,16 @@
                         <div class="mb-3 pb-3 border-bottom">
                             <p>
                                 <strong>Rating: @review.Rating / 5</strong>
+                                <span class="text-warning">
+                                    @for (int i = 0; i < review.Rating; i++)
+                                    {
+                                        <span>&#9733;</span>
+                                    }
+                                    @for (int i = review.Rating; i < 5; i++)
+                                    {
+                                        <span>&#9734;</span>
+                                    }
+                                </span>
                             </p>
                             @if (!string.IsNullOrEmpty(review.ReviewText))
                             {
@@ -92,9 +154,75 @@
     </div>
 
     <div class="col-md-4">
+        @* Purchase Card *@
+        <div class="card mb-3">
+            <div class="card-header bg-primary text-white">
+                <i class="bi bi-cart"></i> Purchase
+            </div>
+            <div class="card-body">
+                <h4 class="text-primary mb-3">@Model.Price.ToString("C")</h4>
+
+                @{
+                    var cart = Context.Session.GetCart();
+                    var cartItem = cart.Items.FirstOrDefault(i => i.BookID == Model.BookID);
+                }
+
+                @if (cartItem != null)
+                {
+                    <div class="alert alert-info mb-3">
+                        <i class="bi bi-cart-check"></i> You have <strong>@cartItem.Quantity</strong> of this book in your cart.
+                        <a asp-controller="ShoppingCart" asp-action="Index" class="alert-link">View Cart</a>
+                    </div>
+                }
+
+                @if (Model.BookStatus == Group13_Final_Project.Models.BookStatusEnum.Active && Model.InStock)
+                {
+                    <p class="text-success mb-3">
+                        <i class="bi bi-check-circle"></i> In Stock (@Model.InventoryQuantity available)
+                    </p>
+
+                    <form asp-controller="ShoppingCart" asp-action="AddToCart" method="post">
+                        <input type="hidden" name="bookId" value="@Model.BookID" />
+                        <div class="form-group mb-3">
+                            <label for="quantity">Quantity:</label>
+                            <select name="quantity" id="quantity" class="form-control">
+                                @for (int i = 1; i <= Math.Min(10, Model.InventoryQuantity); i++)
+                                {
+                                    <option value="@i">@i</option>
+                                }
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-success btn-block w-100">
+                            <i class="bi bi-cart-plus"></i> Add to Cart
+                        </button>
+                    </form>
+                }
+                else if (Model.BookStatus == Group13_Final_Project.Models.BookStatusEnum.Discontinued)
+                {
+                    <p class="text-danger">
+                        <i class="bi bi-x-circle"></i> Discontinued
+                    </p>
+                    <button class="btn btn-secondary btn-block w-100" disabled>Not Available</button>
+                }
+                else
+                {
+                    <p class="text-warning">
+                        <i class="bi bi-clock"></i> Out of Stock
+                    </p>
+                    <button class="btn btn-secondary btn-block w-100" disabled>Out of Stock</button>
+                }
+            </div>
+        </div>
+
+        @* Navigation Card *@
         <div class="card">
             <div class="card-body">
-                <a asp-action="Index" class="btn btn-secondary btn-block">Back to Book List</a>
+                <a asp-action="Index" class="btn btn-outline-secondary btn-block w-100 mb-2">
+                    <i class="bi bi-arrow-left"></i> Back to Book List
+                </a>
+                <a asp-controller="ShoppingCart" asp-action="Index" class="btn btn-outline-primary btn-block w-100">
+                    <i class="bi bi-cart"></i> View Cart
+                </a>
             </div>
         </div>
     </div>

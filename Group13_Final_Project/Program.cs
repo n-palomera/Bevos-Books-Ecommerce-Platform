@@ -42,6 +42,10 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.User.AllowedUserNameCharacters =
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
     options.User.RequireUniqueEmail = true;
+    // SignIn settings - disable email confirmation requirement
+    options.SignIn.RequireConfirmedAccount = false;
+    options.SignIn.RequireConfirmedEmail = false;
+    options.SignIn.RequireConfirmedPhoneNumber = false;
 });
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -53,6 +57,14 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.SlidingExpiration = true;
 });
 
+// Add session services for shopping cart
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 
 //build the app
 var app = builder.Build();
@@ -67,6 +79,9 @@ app.UseStaticFiles();
 //This marks the position in the middleware pipeline where a routing decision
 //is made for a URL.
 app.UseRouting();
+
+// Enable session for shopping cart
+app.UseSession();
 
 //(HW4 & Beyond) Once you have added Identity into your project, you will need to uncomment these lines
 app.UseAuthentication();

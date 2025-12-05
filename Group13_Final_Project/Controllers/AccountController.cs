@@ -90,13 +90,13 @@ namespace Group13_Final_Project.Controllers
 
         // GET: /Account/Login
         [AllowAnonymous]
-        public IActionResult Login(string returnUrl)
+        public async Task<IActionResult> Login(string returnUrl)
         {
             if (User.Identity.IsAuthenticated)
             {
                 return View("Error", new string[] { "Access Denied" });
             }
-            _signInManager.SignOutAsync();
+            await _signInManager.SignOutAsync();
             ViewBag.ReturnUrl = returnUrl;
             return View();
         }
@@ -105,7 +105,7 @@ namespace Group13_Final_Project.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Login(LoginViewModel lvm, string returnUrl)
+        public async Task<ActionResult> Login(LoginViewModel lvm, string? returnUrl = null)
         {
             if (ModelState.IsValid == false)
             {
@@ -124,11 +124,20 @@ namespace Group13_Final_Project.Controllers
 
             if (result.Succeeded)
             {
-                return Redirect(returnUrl ?? "/");
+                // Fix: check for null OR empty returnUrl
+                return Redirect(string.IsNullOrEmpty(returnUrl) ? "/" : returnUrl);
             }
             else
             {
-                ModelState.AddModelError("", "Invalid login attempt.");
+                // Debug: Show specific failure reason
+                if (result.IsLockedOut)
+                    ModelState.AddModelError("", "Account is locked out.");
+                else if (result.IsNotAllowed)
+                    ModelState.AddModelError("", "Login not allowed. Email may need confirmation.");
+                else if (result.RequiresTwoFactor)
+                    ModelState.AddModelError("", "Two-factor authentication required.");
+                else
+                    ModelState.AddModelError("", "Invalid login attempt.");
                 return View(lvm);
             }
         }
@@ -450,6 +459,73 @@ namespace Group13_Final_Project.Controllers
             };
 
             return View(rvm);
+        }
+
+        // GET: Account/AddCard
+        [Authorize(Roles = "Customer")]
+        public async Task<IActionResult> AddCard()
+        {
+            String username = User.Identity.Name;
+            AppUser user = await _context.Users
+                .Include(u => u.Cards)
+                .FirstOrDefaultAsync(u => u.UserName == username);
+
+            if (user == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            // Check if user already has 3 cards
+            if (user.Cards?.Count >= 3)
+            {
+                TempData["Error"] = "You already have the maximum of 3 credit cards.";
+                return RedirectToAction("MyCards");
+            }
+
+            return View();
+        }
+
+        // POST: Account/AddCard
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Customer")]
+        public async Task<IActionResult> AddCard(Card card)
+        {
+            String username = User.Identity.Name;
+            AppUser user = await _context.Users
+                .Include(u => u.Cards)
+                .FirstOrDefaultAsync(u => u.UserName == username);
+
+            if (user == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            // Check if user already has 3 cards
+            if (user.Cards?.Count >= 3)
+            {
+                TempData["Error"] = "You already have the maximum of 3 credit cards.";
+                return RedirectToAction("MyCards");
+            }
+
+            // Validate card number
+            if (string.IsNullOrEmpty(card.CardNumber) || card.CardNumber.Length != 16 || !card.CardNumber.All(char.IsDigit))
+            {
+                ModelState.AddModelError("CardNumber", "Card number must be exactly 16 digits.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(card);
+            }
+
+            // Create the card
+            card.CustomerID = user.Id;
+            _context.Cards.Add(card);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Credit card added successfully!";
+            return RedirectToAction("MyCards");
         }
 
         // POST: /Account/LogOff

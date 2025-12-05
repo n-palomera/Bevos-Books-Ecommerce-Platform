@@ -1,0 +1,57 @@
+@model Card
+
+@{
+    ViewData["Title"] = "Add Credit Card";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-credit-card-2-front"></i> Add New Credit Card</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="AddCard" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="CardNumber" class="form-label"></label>
+                            <input asp-for="CardNumber" class="form-control" placeholder="Enter 16-digit card number" maxlength="16" />
+                            <span asp-validation-for="CardNumber" class="text-danger"></span>
+                            <small class="text-muted">Card number must be exactly 16 digits</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="CardType" class="form-label"></label>
+                            <select asp-for="CardType" asp-items="Html.GetEnumSelectList<CardTypeEnum>()" class="form-select">
+                                <option value="">-- Select Card Type --</option>
+                            </select>
+                            <span asp-validation-for="CardType" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="bi bi-plus-circle"></i> Add Card
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer">
+                    <a asp-action="MyCards" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to My Cards
+                    </a>
+                </div>
+            </div>
+
+            <div class="alert alert-info mt-3">
+                <i class="bi bi-shield-lock"></i>
+                <strong>Security Note:</strong> Your card information is stored securely. Only the last 4 digits will be displayed after saving.
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

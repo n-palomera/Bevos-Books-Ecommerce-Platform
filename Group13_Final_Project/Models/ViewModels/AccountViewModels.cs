@@ -175,8 +175,10 @@ namespace Group13_Final_Project.Models
     public class CreateReviewViewModel
     {
         public Int32 BookID { get; set; }
-        public String BookTitle { get; set; }
-        public String BookAuthor { get; set; }
+
+        // Display-only fields - not submitted with form, so must be nullable
+        public String? BookTitle { get; set; }
+        public String? BookAuthor { get; set; }
 
         [Required(ErrorMessage = "Rating is required")]
         [Display(Name = "Rating (1-5)")]
@@ -185,7 +187,7 @@ namespace Group13_Final_Project.Models
 
         [Display(Name = "Review (Optional)")]
         [StringLength(100, ErrorMessage = "Review cannot exceed 100 characters")]
-        public String ReviewText { get; set; }
+        public String? ReviewText { get; set; }
     }
 
     // View model for book recommendations
@@ -193,5 +195,26 @@ namespace Group13_Final_Project.Models
     {
         public Int32 OrderID { get; set; }
         public List<Book> RecommendedBooks { get; set; }
+    }
+
+    // View model for employee editing a review (text only, not rating)
+    public class EditReviewViewModel
+    {
+        public Int32 ReviewID { get; set; }
+
+        // Display-only fields - not submitted with form, so must be nullable
+        public String? BookTitle { get; set; }
+        public String? BookAuthor { get; set; }
+        public String? ReviewerName { get; set; }
+
+        [Display(Name = "Rating")]
+        public Int32 Rating { get; set; } // Display only - cannot be changed
+
+        [Display(Name = "Review Text")]
+        [StringLength(100, ErrorMessage = "Review text cannot exceed 100 characters")]
+        public String? ReviewText { get; set; }
+
+        [Display(Name = "Status")]
+        public DisputeStatusEnum DisputeStatus { get; set; }
     }
 }
