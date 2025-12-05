@@ -1,0 +1,89 @@
+﻿@model Order
+
+@{
+    ViewData["Title"] = "Mark Order as Delivered";
+}
+
+<h1><i class="bi bi-check-circle"></i> Mark as Delivered</h1>
+<p class="lead">Confirm delivery for Order #@Model.OrderID</p>
+
+<hr />
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="alert alert-success">
+            <h4 class="alert-heading"><i class="bi bi-check-circle"></i> Confirm Delivery</h4>
+            <p>Are you sure you want to mark this order as <strong>Delivered</strong>?</p>
+            <hr />
+            <p class="mb-0">
+                This action will update the order status and notify the customer that their order has been delivered successfully.
+            </p>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="card mb-3">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Order #@Model.OrderID</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Order Date:</dt>
+                    <dd class="col-sm-8">@Model.OrderDate.ToString("MMMM dd, yyyy")</dd>
+
+                    <dt class="col-sm-4">Current Status:</dt>
+                    <dd class="col-sm-8"><span class="badge badge-primary">@Model.OrderStatus</span></dd>
+
+                    <dt class="col-sm-4">Customer:</dt>
+                    <dd class="col-sm-8">
+                        @Model.Customer.FirstName @Model.Customer.LastName<br />
+                        <small class="text-muted">@Model.Customer.Email</small>
+                    </dd>
+
+                    <dt class="col-sm-4">Delivery Address:</dt>
+                    <dd class="col-sm-8">
+                        @Model.Customer.Address<br />
+                        @Model.Customer.City, @Model.Customer.State @Model.Customer.ZipCode
+                    </dd>
+
+                    <dt class="col-sm-4">Order Total:</dt>
+                    <dd class="col-sm-8"><strong>@Model.Total.ToString("C")</strong></dd>
+                </dl>
+            </div>
+        </div>
+
+        <!-- Confirmation Form -->
+        <form asp-action="MarkDelivered" method="post">
+            <input type="hidden" asp-for="OrderID" />
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-success btn-lg">
+                    <i class="bi bi-check-circle"></i> Mark as Delivered
+                </button>
+                <a asp-action="Details" asp-route-id="@Model.OrderID" class="btn btn-secondary btn-lg">
+                    <i class="bi bi-x"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> Delivery Info</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>What happens when marked as delivered:</strong></p>
+                <ul>
+                    <li>Order status changes to "Delivered"</li>
+                    <li>Customer receives confirmation email</li>
+                    <li>Order is considered complete</li>
+                    <li>No further status updates needed</li>
+                </ul>
+                <hr />
+                <p class="mb-0">
+                    <strong>Note:</strong> Only shipped orders can be marked as delivered.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

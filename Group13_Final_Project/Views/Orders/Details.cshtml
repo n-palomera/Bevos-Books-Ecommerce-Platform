@@ -10,9 +10,30 @@
 
 <div class="row">
     <div class="col-md-8">
+        <!-- Order Information Card -->
         <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    Order Information
+                    @if (Model.OrderStatus == OrderStatusEnum.Pending)
+                    {
+                        <span class="badge badge-warning float-right">Pending</span>
+                    }
+                    else if (Model.OrderStatus == OrderStatusEnum.Shipped)
+                    {
+                        <span class="badge badge-info float-right">Shipped</span>
+                    }
+                    else if (Model.OrderStatus == OrderStatusEnum.Delivered)
+                    {
+                        <span class="badge badge-success float-right">Delivered</span>
+                    }
+                    else if (Model.OrderStatus == OrderStatusEnum.Cancelled)
+                    {
+                        <span class="badge badge-danger float-right">Cancelled</span>
+                    }
+                </h5>
+            </div>
             <div class="card-body">
-                <h5 class="card-title">Order Information</h5>
                 <dl class="row">
                     <dt class="col-sm-3">Order ID:</dt>
                     <dd class="col-sm-9">@Model.OrderID</dd>
@@ -23,34 +44,32 @@
                     <dt class="col-sm-3">Email:</dt>
                     <dd class="col-sm-9">@Model.Customer.Email</dd>
 
+                    <dt class="col-sm-3">Phone:</dt>
+                    <dd class="col-sm-9">@Model.Customer.PhoneNumber</dd>
+
                     <dt class="col-sm-3">Order Date:</dt>
                     <dd class="col-sm-9">@Model.OrderDate.ToString("MMMM dd, yyyy")</dd>
 
+                    <dt class="col-sm-3">Shipping Address:</dt>
+                    <dd class="col-sm-9">
+                        @Model.Customer.Address<br />
+                        @Model.Customer.City, @Model.Customer.State @Model.Customer.ZipCode
+                    </dd>
+
                     <dt class="col-sm-3">Status:</dt>
                     <dd class="col-sm-9">
-                        @switch (Model.OrderStatus)
-                        {
-                            case Group13_Final_Project.Models.OrderStatusEnum.Pending:
-                                <span class="badge badge-warning">Pending</span>
-                                break;
-                            case Group13_Final_Project.Models.OrderStatusEnum.Shipped:
-                                <span class="badge badge-info">Shipped</span>
-                                break;
-                            case Group13_Final_Project.Models.OrderStatusEnum.Delivered:
-                                <span class="badge badge-success">Delivered</span>
-                                break;
-                            case Group13_Final_Project.Models.OrderStatusEnum.Cancelled:
-                                <span class="badge badge-danger">Cancelled</span>
-                                break;
-                        }
+                        <strong>@Model.OrderStatus</strong>
                     </dd>
                 </dl>
             </div>
         </div>
 
+        <!-- Order Items Card -->
         <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Order Items</h5>
+            </div>
             <div class="card-body">
-                <h5 class="card-title">Order Items</h5>
                 <table class="table">
                     <thead>
                         <tr>
@@ -68,6 +87,11 @@
                                     <a asp-controller="Books" asp-action="Details" asp-route-id="@detail.BookID">
                                         @detail.Book.Title
                                     </a>
+                                    @if (detail.Book.Genre != null)
+                                    {
+                                        <br />
+                                        <small class="text-muted">@detail.Book.Genre.GenreName</small>
+                                    }
                                 </td>
                                 <td>@detail.Quantity</td>
                                 <td>@detail.Price.ToString("C")</td>
@@ -84,20 +108,136 @@
                             <td colspan="3" class="text-right"><strong>Shipping:</strong></td>
                             <td><strong>@Model.ShippingFee.ToString("C")</strong></td>
                         </tr>
+                        @if (Model.Coupon != null)
+                        {
+                            <tr>
+                                <td colspan="3" class="text-right text-success"><strong>Coupon (@Model.Coupon.CouponCode):</strong></td>
+                                <td class="text-success">
+                                    @if (Model.Coupon.CouponType == CouponTypeEnum.PercentOff)
+                                    {
+                                        <strong>@Model.Coupon.DiscountPercent% Off</strong>
+                                    }
+                                    else
+                                    {
+                                        <strong>Free Shipping</strong>
+                                    }
+                                </td>
+                            </tr>
+                        }
                         <tr class="table-active">
                             <td colspan="3" class="text-right"><strong>Total:</strong></td>
-                            <td><strong>@orderTotal.ToString("C")</strong></td>
+                            <td><strong>@Model.Total.ToString("C")</strong></td>
                         </tr>
                     </tfoot>
                 </table>
             </div>
         </div>
+
+        <!-- Payment Information Card -->
+        @if (Model.Card != null)
+        {
+            <div class="card mb-4">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0">Payment Information</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">
+                        <strong>Card Type:</strong> @Model.Card.CardType<br />
+                        <strong>Card Number:</strong> @Model.Card.MaskedCardNumber
+                    </p>
+                </div>
+            </div>
+        }
     </div>
 
     <div class="col-md-4">
-        <div class="card">
+        <!-- Action Buttons Card -->
+        <div class="card mb-3">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">Actions</h5>
+            </div>
             <div class="card-body">
-                <a asp-action="Index" class="btn btn-secondary btn-block">Back to Orders List</a>
+                @if (Model.OrderStatus == OrderStatusEnum.Pending)
+                {
+                    <a asp-action="Ship" asp-route-id="@Model.OrderID" class="btn btn-success btn-block mb-2">
+                        <i class="bi bi-truck"></i> Ship Order
+                    </a>
+                    <a asp-action="Cancel" asp-route-id="@Model.OrderID" class="btn btn-danger btn-block mb-2">
+                        <i class="bi bi-x-circle"></i> Cancel Order
+                    </a>
+                }
+                else if (Model.OrderStatus == OrderStatusEnum.Shipped)
+                {
+                    <a asp-action="MarkDelivered" asp-route-id="@Model.OrderID" class="btn btn-success btn-block mb-2">
+                        <i class="bi bi-check-circle"></i> Mark as Delivered
+                    </a>
+                    <div class="alert alert-info mb-2">
+                        <small><i class="bi bi-info-circle"></i> This order has been shipped and cannot be cancelled.</small>
+                    </div>
+                }
+                else if (Model.OrderStatus == OrderStatusEnum.Cancelled)
+                {
+                    <div class="alert alert-danger mb-2">
+                        <i class="bi bi-exclamation-triangle"></i> This order has been cancelled.
+                    </div>
+                }
+                else if (Model.OrderStatus == OrderStatusEnum.Delivered)
+                {
+                    <div class="alert alert-success mb-2">
+                        <i class="bi bi-check-circle"></i> This order has been delivered.
+                    </div>
+                }
+
+                <a asp-action="Index" class="btn btn-secondary btn-block">
+                    <i class="bi bi-arrow-left"></i> Back to Orders List
+                </a>
+            </div>
+        </div>
+
+        <!-- Order Timeline Card -->
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0">Order Status</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="bi bi-circle-fill text-success"></i> Order Placed
+                        <br /><small class="text-muted">@Model.OrderDate.ToString("MM/dd/yyyy")</small>
+                    </li>
+                    @if (Model.OrderStatus == OrderStatusEnum.Shipped || Model.OrderStatus == OrderStatusEnum.Delivered)
+                    {
+                        <li class="mb-2">
+                            <i class="bi bi-circle-fill text-success"></i> Shipped
+                        </li>
+                    }
+                    else if (Model.OrderStatus == OrderStatusEnum.Pending)
+                    {
+                        <li class="mb-2">
+                            <i class="bi bi-circle text-muted"></i> Awaiting Shipment
+                        </li>
+                    }
+                    
+                    @if (Model.OrderStatus == OrderStatusEnum.Delivered)
+                    {
+                        <li class="mb-2">
+                            <i class="bi bi-circle-fill text-success"></i> Delivered
+                        </li>
+                    }
+                    else if (Model.OrderStatus != OrderStatusEnum.Cancelled)
+                    {
+                        <li class="mb-2">
+                            <i class="bi bi-circle text-muted"></i> Awaiting Delivery
+                        </li>
+                    }
+                    
+                    @if (Model.OrderStatus == OrderStatusEnum.Cancelled)
+                    {
+                        <li class="mb-2">
+                            <i class="bi bi-x-circle-fill text-danger"></i> Order Cancelled
+                        </li>
+                    }
+                </ul>
             </div>
         </div>
     </div>

@@ -1,0 +1,114 @@
+﻿@model Order
+
+@{
+    ViewData["Title"] = "Cancel Order";
+}
+
+<h1><i class="bi bi-x-circle"></i> Cancel Order</h1>
+<p class="lead">Confirm cancellation for Order #@Model.OrderID</p>
+
+<hr />
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="alert alert-danger">
+            <h4 class="alert-heading"><i class="bi bi-exclamation-triangle"></i> Confirm Cancellation</h4>
+            <p>Are you sure you want to <strong>CANCEL</strong> this order?</p>
+            <hr />
+            <p class="mb-0">
+                <strong>Warning:</strong> This action cannot be undone. The customer will be notified of the cancellation.
+            </p>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="card mb-3">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Order #@Model.OrderID</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Order Date:</dt>
+                    <dd class="col-sm-8">@Model.OrderDate.ToString("MMMM dd, yyyy")</dd>
+
+                    <dt class="col-sm-4">Current Status:</dt>
+                    <dd class="col-sm-8"><span class="badge badge-warning">@Model.OrderStatus</span></dd>
+
+                    <dt class="col-sm-4">Customer:</dt>
+                    <dd class="col-sm-8">
+                        @Model.Customer.FirstName @Model.Customer.LastName<br />
+                        <small class="text-muted">@Model.Customer.Email</small>
+                    </dd>
+
+                    <dt class="col-sm-4">Total Items:</dt>
+                    <dd class="col-sm-8">@Model.TotalItems</dd>
+
+                    <dt class="col-sm-4">Order Total:</dt>
+                    <dd class="col-sm-8"><strong>@Model.Total.ToString("C")</strong></dd>
+                </dl>
+            </div>
+        </div>
+
+        <!-- Items in Order -->
+        <div class="card mb-3">
+            <div class="card-header bg-warning">
+                <h5 class="mb-0"><i class="bi bi-box"></i> Order Items</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Book Title</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var detail in Model.OrderDetails)
+                        {
+                            <tr>
+                                <td>@detail.Book.Title</td>
+                                <td>@detail.Quantity</td>
+                                <td>@detail.LineTotal.ToString("C")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Confirmation Form -->
+        <form asp-action="Cancel" method="post">
+            <input type="hidden" asp-for="OrderID" />
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-danger btn-lg">
+                    <i class="bi bi-x-circle"></i> Confirm Cancellation
+                </button>
+                <a asp-action="Details" asp-route-id="@Model.OrderID" class="btn btn-secondary btn-lg">
+                    <i class="bi bi-arrow-left"></i> Go Back
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> Cancellation Policy</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>What happens when you cancel:</strong></p>
+                <ul>
+                    <li>Order status changes to "Cancelled"</li>
+                    <li>Customer receives notification email</li>
+                    <li>Order cannot be shipped or modified</li>
+                    <li>Action is permanent and cannot be undone</li>
+                </ul>
+                <hr />
+                <p class="text-danger mb-0">
+                    <strong>Note:</strong> Only pending orders can be cancelled. Orders that have already been shipped cannot be cancelled.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

@@ -34,6 +34,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = R3JvdXAxM19GaW5hbF9Qcm9qZWN0L1ZpZXdzL1NlZWQvSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[/Users/nathanpalomera/Desktop/MIS333K/Group13_Final_Project/Group13_Final_Project/Views/Account/AddCard.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWNjb3VudC9BZGRDYXJkLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Users/nathanpalomera/Desktop/MIS333K/Group13_Final_Project/Group13_Final_Project/Views/Account/Cards.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWNjb3VudC9DYXJkcy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -52,6 +56,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [/Users/nathanpalomera/Desktop/MIS333K/Group13_Final_Project/Group13_Final_Project/Views/Account/Login.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWNjb3VudC9Mb2dpbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/nathanpalomera/Desktop/MIS333K/Group13_Final_Project/Group13_Final_Project/Views/Account/MyCards.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWNjb3VudC9NeUNhcmRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/nathanpalomera/Desktop/MIS333K/Group13_Final_Project/Group13_Final_Project/Views/Account/OrderHistory.cshtml]
@@ -90,6 +98,14 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9JbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[/Users/nathanpalomera/Desktop/MIS333K/Group13_Final_Project/Group13_Final_Project/Views/Orders/Cancel.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvT3JkZXJzL0NhbmNlbC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/nathanpalomera/Desktop/MIS333K/Group13_Final_Project/Group13_Final_Project/Views/Orders/Delivered.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvT3JkZXJzL0RlbGl2ZXJlZC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Users/nathanpalomera/Desktop/MIS333K/Group13_Final_Project/Group13_Final_Project/Views/Orders/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvT3JkZXJzL0RldGFpbHMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
@@ -98,8 +114,16 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvT3JkZXJzL0luZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[/Users/nathanpalomera/Desktop/MIS333K/Group13_Final_Project/Group13_Final_Project/Views/Orders/Ship.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvT3JkZXJzL1NoaXAuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Users/nathanpalomera/Desktop/MIS333K/Group13_Final_Project/Group13_Final_Project/Views/Reviews/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUmV2aWV3cy9DcmVhdGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/nathanpalomera/Desktop/MIS333K/Group13_Final_Project/Group13_Final_Project/Views/Reviews/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUmV2aWV3cy9FZGl0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/nathanpalomera/Desktop/MIS333K/Group13_Final_Project/Group13_Final_Project/Views/Reviews/Index.cshtml]
@@ -136,6 +160,22 @@ build_metadata.AdditionalFiles.CssScope =
 
 [/Users/nathanpalomera/Desktop/MIS333K/Group13_Final_Project/Group13_Final_Project/Views/Shared/_Layout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19MYXlvdXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/nathanpalomera/Desktop/MIS333K/Group13_Final_Project/Group13_Final_Project/Views/Shared/_ValidationScriptsPartial.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/nathanpalomera/Desktop/MIS333K/Group13_Final_Project/Group13_Final_Project/Views/ShoppingCart/Checkout.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hvcHBpbmdDYXJ0L0NoZWNrb3V0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/nathanpalomera/Desktop/MIS333K/Group13_Final_Project/Group13_Final_Project/Views/ShoppingCart/Confirmation.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hvcHBpbmdDYXJ0L0NvbmZpcm1hdGlvbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/nathanpalomera/Desktop/MIS333K/Group13_Final_Project/Group13_Final_Project/Views/ShoppingCart/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hvcHBpbmdDYXJ0L0luZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/nathanpalomera/Desktop/MIS333K/Group13_Final_Project/Group13_Final_Project/Views/_ViewImports.cshtml]
