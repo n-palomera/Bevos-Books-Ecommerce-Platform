@@ -1,7 +1,9 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Group13_Final_Project.DAL;
 using Group13_Final_Project.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -156,6 +158,210 @@ namespace Group13_Final_Project.Controllers
             }
 
             return View(book);
+        }
+
+        // GET: Books/Create (Admin only)
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Create()
+        {
+            // Get next book number (must be consecutive starting from 222001)
+            var maxBookNumber = await _context.Books.MaxAsync(b => (int?)b.BookNumber) ?? 222000;
+            ViewBag.NextBookNumber = maxBookNumber + 1;
+
+            // Get genres for dropdown
+            ViewData["GenreID"] = new SelectList(await _context.Genres.OrderBy(g => g.GenreName).ToListAsync(), "GenreID", "GenreName");
+
+            return View();
+        }
+
+        // POST: Books/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Create([Bind("Title,Description,Price,Cost,PublishDate,InventoryQuantity,ReorderPoint,Authors,GenreID")] Book book, string newGenre)
+        {
+            // Handle new genre creation
+            if (!string.IsNullOrWhiteSpace(newGenre))
+            {
+                var existingGenre = await _context.Genres.FirstOrDefaultAsync(g => g.GenreName == newGenre);
+                if (existingGenre == null)
+                {
+                    var genre = new Genre { GenreName = newGenre };
+                    _context.Genres.Add(genre);
+                    await _context.SaveChangesAsync();
+                    book.GenreID = genre.GenreID;
+                }
+                else
+                {
+                    book.GenreID = existingGenre.GenreID;
+                }
+            }
+
+            if (ModelState.IsValid)
+            {
+                // Set consecutive book number
+                var maxBookNumber = await _context.Books.MaxAsync(b => (int?)b.BookNumber) ?? 222000;
+                book.BookNumber = maxBookNumber + 1;
+
+                // Set default status
+                book.BookStatus = BookStatusEnum.Active;
+
+                _context.Add(book);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = $"Book '{book.Title}' has been added successfully with Book Number {book.BookNumber}.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Repopulate dropdown on error
+            ViewData["GenreID"] = new SelectList(await _context.Genres.OrderBy(g => g.GenreName).ToListAsync(), "GenreID", "GenreName", book.GenreID);
+            return View(book);
+        }
+
+        // GET: Books/Edit/5 (Admin only)
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var book = await _context.Books
+                .Include(b => b.Reorders)
+                .Include(b => b.OrderDetails)
+                .FirstOrDefaultAsync(b => b.BookID == id);
+
+            if (book == null)
+            {
+                return NotFound();
+            }
+
+            // Calculate last cost paid and profit margin for display
+            var lastReorder = book.Reorders.OrderByDescending(r => r.Date).FirstOrDefault();
+            ViewBag.LastCostPaid = lastReorder?.Cost ?? book.Cost;
+
+            var orderDetails = book.OrderDetails.ToList();
+            ViewBag.AverageProfitMargin = orderDetails.Any()
+                ? orderDetails.Average(od => od.Price - od.Cost)
+                : 0m;
+
+            ViewData["GenreID"] = new SelectList(await _context.Genres.OrderBy(g => g.GenreName).ToListAsync(), "GenreID", "GenreName", book.GenreID);
+            return View(book);
+        }
+
+        // POST: Books/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Edit(int id, [Bind("BookID,BookNumber,Title,Description,Price,Cost,PublishDate,InventoryQuantity,ReorderPoint,Authors,BookStatus,GenreID")] Book book, string newGenre)
+        {
+            if (id != book.BookID)
+            {
+                return NotFound();
+            }
+
+            // Handle new genre creation
+            if (!string.IsNullOrWhiteSpace(newGenre))
+            {
+                var existingGenre = await _context.Genres.FirstOrDefaultAsync(g => g.GenreName == newGenre);
+                if (existingGenre == null)
+                {
+                    var genre = new Genre { GenreName = newGenre };
+                    _context.Genres.Add(genre);
+                    await _context.SaveChangesAsync();
+                    book.GenreID = genre.GenreID;
+                }
+                else
+                {
+                    book.GenreID = existingGenre.GenreID;
+                }
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Update(book);
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = $"Book '{book.Title}' has been updated successfully.";
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!BookExists(book.BookID))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(Index));
+            }
+
+            ViewData["GenreID"] = new SelectList(await _context.Genres.OrderBy(g => g.GenreName).ToListAsync(), "GenreID", "GenreName", book.GenreID);
+            return View(book);
+        }
+
+        // GET: Books/Discontinue/5 (Admin only)
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Discontinue(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var book = await _context.Books
+                .Include(b => b.Genre)
+                .FirstOrDefaultAsync(m => m.BookID == id);
+
+            if (book == null)
+            {
+                return NotFound();
+            }
+
+            return View(book);
+        }
+
+        // POST: Books/Discontinue/5
+        [HttpPost, ActionName("Discontinue")]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DiscontinueConfirmed(int id)
+        {
+            var book = await _context.Books.FindAsync(id);
+            if (book != null)
+            {
+                book.BookStatus = BookStatusEnum.Discontinued;
+                _context.Update(book);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = $"Book '{book.Title}' has been discontinued.";
+            }
+            return RedirectToAction(nameof(Index));
+        }
+
+        // POST: Books/Reactivate/5 (Admin only)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Reactivate(int id)
+        {
+            var book = await _context.Books.FindAsync(id);
+            if (book != null)
+            {
+                book.BookStatus = BookStatusEnum.Active;
+                _context.Update(book);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = $"Book '{book.Title}' has been reactivated.";
+            }
+            return RedirectToAction(nameof(Index));
+        }
+
+        // Helper method
+        private bool BookExists(int id)
+        {
+            return _context.Books.Any(e => e.BookID == id);
         }
     }
 }
