@@ -16,7 +16,6 @@
     <None Remove="DAL\" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Controllers\" />
     <Folder Include="Models\" />
     <Folder Include="Views\" />
     <Folder Include="Views\Home\" />
