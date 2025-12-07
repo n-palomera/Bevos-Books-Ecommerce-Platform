@@ -1,0 +1,98 @@
+@model IEnumerable<Group13_Final_Project.Models.ViewModels.CustomerReportViewModel>
+
+@{
+    ViewData["Title"] = "All Customers Report";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-people"></i> All Customers Report</h2>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Reports
+        </a>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h4>@Model.Count()</h4>
+                    <small>Total Customers</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h4>@(((decimal)ViewBag.TotalRevenue).ToString("C"))</h4>
+                    <small>Total Revenue</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h4>@(((decimal)ViewBag.TotalProfit).ToString("C"))</h4>
+                    <small>Total Profit</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-body">
+            <p class="text-muted mb-3">@ViewBag.RecordCount</p>
+
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Customer #</th>
+                                <th>
+                                    <a asp-action="AllCustomers" asp-route-sortOrder="@ViewData["NameSort"]" class="text-white text-decoration-none">
+                                        Name <i class="bi bi-arrow-down-up"></i>
+                                    </a>
+                                </th>
+                                <th>Email</th>
+                                <th class="text-center">
+                                    <a asp-action="AllCustomers" asp-route-sortOrder="@ViewData["OrdersSort"]" class="text-white text-decoration-none">
+                                        Orders <i class="bi bi-arrow-down-up"></i>
+                                    </a>
+                                </th>
+                                <th class="text-end">
+                                    <a asp-action="AllCustomers" asp-route-sortOrder="@ViewData["RevenueSort"]" class="text-white text-decoration-none">
+                                        Revenue <i class="bi bi-arrow-down-up"></i>
+                                    </a>
+                                </th>
+                                <th class="text-end">Profit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@(item.CustomerNumber?.ToString() ?? "N/A")</td>
+                                    <td><strong>@item.CustomerName</strong></td>
+                                    <td>@item.Email</td>
+                                    <td class="text-center">@item.OrderCount</td>
+                                    <td class="text-end">@item.TotalRevenue.ToString("C")</td>
+                                    <td class="text-end @(item.TotalProfit >= 0 ? "text-success" : "text-danger")">
+                                        @item.TotalProfit.ToString("C")
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> No customer data available.
+                </div>
+            }
+        </div>
+    </div>
+</div>

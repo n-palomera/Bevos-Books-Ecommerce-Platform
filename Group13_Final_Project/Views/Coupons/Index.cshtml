@@ -1,0 +1,152 @@
+@model IEnumerable<Group13_Final_Project.Models.Coupon>
+
+@{
+    ViewData["Title"] = "Manage Coupons";
+    var usageCounts = ViewBag.UsageCounts as Dictionary<int, int> ?? new Dictionary<int, int>();
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-tag"></i> Manage Coupons</h2>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i> Create New Coupon
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header bg-light">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <input type="text" name="searchString" value="@ViewData["CurrentFilter"]"
+                           class="form-control" placeholder="Search by coupon code..." />
+                </div>
+                <div class="col-md-3">
+                    <select name="typeFilter" class="form-select">
+                        <option value="">All Types</option>
+                        <option value="PercentOff" selected="@(ViewData["CurrentType"]?.ToString() == "PercentOff")">Percent Off</option>
+                        <option value="FreeShipping" selected="@(ViewData["CurrentType"]?.ToString() == "FreeShipping")">Free Shipping</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select name="statusFilter" class="form-select">
+                        <option value="">All Status</option>
+                        <option value="Active" selected="@(ViewData["CurrentStatus"]?.ToString() == "Active")">Active</option>
+                        <option value="Inactive" selected="@(ViewData["CurrentStatus"]?.ToString() == "Inactive")">Inactive</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-outline-primary w-100">
+                        <i class="bi bi-search"></i> Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+        <div class="card-body">
+            <p class="text-muted mb-3">@ViewBag.RecordCount</p>
+
+            @if (!Model.Any())
+            {
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> No coupons found. Create one to get started!
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Code</th>
+                                <th>Type</th>
+                                <th>Details</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center">Times Used</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var coupon in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong class="text-primary">@coupon.CouponCode</strong>
+                                    </td>
+                                    <td>
+                                        @if (coupon.CouponType == CouponTypeEnum.PercentOff)
+                                        {
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-percent"></i> Percent Off
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-info">
+                                                <i class="bi bi-truck"></i> Free Shipping
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (coupon.CouponType == CouponTypeEnum.PercentOff)
+                                        {
+                                            <span>@coupon.DiscountPercent% off entire order</span>
+                                        }
+                                        else
+                                        {
+                                            @if (coupon.FreeThreshold.HasValue)
+                                            {
+                                                <span>Free shipping on orders over @coupon.FreeThreshold.Value.ToString("C")</span>
+                                            }
+                                            else
+                                            {
+                                                <span>Free shipping on all orders</span>
+                                            }
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        @if (coupon.Status)
+                                        {
+                                            <span class="badge bg-success">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Disabled</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        @{
+                                            int useCount = usageCounts.ContainsKey(coupon.CouponID) ? usageCounts[coupon.CouponID] : 0;
+                                        }
+                                        <span class="badge bg-light text-dark">@useCount</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <form asp-action="ToggleStatus" asp-route-id="@coupon.CouponID" method="post" class="d-inline">
+                                            @if (coupon.Status)
+                                            {
+                                                <button type="submit" class="btn btn-sm btn-outline-warning" title="Disable">
+                                                    <i class="bi bi-pause-circle"></i> Disable
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button type="submit" class="btn btn-sm btn-outline-success" title="Enable">
+                                                    <i class="bi bi-play-circle"></i> Enable
+                                                </button>
+                                            }
+                                        </form>
+                                        <a asp-action="Details" asp-route-id="@coupon.CouponID" class="btn btn-sm btn-outline-info" title="Details">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="alert alert-warning">
+        <i class="bi bi-info-circle"></i> <strong>Note:</strong> Coupons cannot be modified after creation. You can only enable or disable them.
+    </div>
+</div>

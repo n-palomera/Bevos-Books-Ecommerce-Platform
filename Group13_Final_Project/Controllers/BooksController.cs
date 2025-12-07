@@ -178,8 +178,15 @@ namespace Group13_Final_Project.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Create([Bind("Title,Description,Price,Cost,PublishDate,InventoryQuantity,ReorderPoint,Authors,GenreID")] Book book, string newGenre)
+        public async Task<IActionResult> Create([Bind("Title,Description,Price,Cost,PublishDate,InventoryQuantity,ReorderPoint,Authors,GenreID")] Book book, string? newGenre)
         {
+            // Clear errors for optional/navigation properties
+            ModelState.Remove("Genre");
+            ModelState.Remove("Reviews");
+            ModelState.Remove("OrderDetails");
+            ModelState.Remove("Reorders");
+            ModelState.Remove("newGenre");
+
             // Handle new genre creation
             if (!string.IsNullOrWhiteSpace(newGenre))
             {
@@ -253,12 +260,19 @@ namespace Group13_Final_Project.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Edit(int id, [Bind("BookID,BookNumber,Title,Description,Price,Cost,PublishDate,InventoryQuantity,ReorderPoint,Authors,BookStatus,GenreID")] Book book, string newGenre)
+        public async Task<IActionResult> Edit(int id, [Bind("BookID,BookNumber,Title,Description,Price,Cost,PublishDate,InventoryQuantity,ReorderPoint,Authors,BookStatus,GenreID")] Book book, string? newGenre)
         {
             if (id != book.BookID)
             {
                 return NotFound();
             }
+
+            // Clear navigation property errors from ModelState (they aren't submitted in form)
+            ModelState.Remove("Genre");
+            ModelState.Remove("Reviews");
+            ModelState.Remove("OrderDetails");
+            ModelState.Remove("Reorders");
+            ModelState.Remove("newGenre");
 
             // Handle new genre creation
             if (!string.IsNullOrWhiteSpace(newGenre))

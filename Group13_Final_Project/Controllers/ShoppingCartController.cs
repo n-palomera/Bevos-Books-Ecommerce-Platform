@@ -4,16 +4,19 @@ using Microsoft.EntityFrameworkCore;
 using Group13_Final_Project.DAL;
 using Group13_Final_Project.Models;
 using Group13_Final_Project.Utilities;
+using Group13_Final_Project.Services;
 
 namespace Group13_Final_Project.Controllers
 {
     public class ShoppingCartController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly IEmailService _emailService;
 
-        public ShoppingCartController(AppDbContext context)
+        public ShoppingCartController(AppDbContext context, IEmailService emailService)
         {
             _context = context;
+            _emailService = emailService;
         }
 
         // GET: ShoppingCart
@@ -515,6 +518,14 @@ namespace Group13_Final_Project.Controllers
                 Order = order,
                 RecommendedBooks = recommendations
             };
+
+            // Send order confirmation email with recommendations
+            await _emailService.SendOrderConfirmationEmailAsync(
+                order.Customer.Email,
+                order.Customer.FirstName,
+                order,
+                recommendations
+            );
 
             return View(viewModel);
         }

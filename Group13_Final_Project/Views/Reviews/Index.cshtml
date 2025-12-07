@@ -2,145 +2,289 @@
 
 @{
     ViewData["Title"] = "Reviews";
+    var activeTab = ViewData["ActiveTab"]?.ToString() ?? "all";
+    var myApprovals = ViewBag.MyApprovals as List<Group13_Final_Project.Models.Review> ?? new List<Group13_Final_Project.Models.Review>();
 }
 
-<h1>All Reviews</h1>
+<div class="container mt-4">
+    <h2><i class="bi bi-star-half"></i> Reviews Management</h2>
 
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        @TempData["Success"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-}
-
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        @TempData["Error"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-}
-
-<form asp-action="Index" method="get" class="mb-4">
-    <div class="row">
-        <div class="col-md-5">
-            <div class="form-group">
-                <label for="searchString">Search by Reviewer or Book:</label>
-                <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" class="form-control" placeholder="Enter search term..."/>
-            </div>
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-        <div class="col-md-3">
-            <div class="form-group">
-                <label for="statusFilter">Filter by Status:</label>
-                <select name="statusFilter" class="form-control">
-                    <option value="">All Statuses</option>
-                    <option value="Approved" selected="@(ViewData["CurrentStatus"]?.ToString() == "Approved")">Approved</option>
-                    <option value="Pending" selected="@(ViewData["CurrentStatus"]?.ToString() == "Pending")">Pending</option>
-                    <option value="Rejected" selected="@(ViewData["CurrentStatus"]?.ToString() == "Rejected")">Rejected</option>
-                </select>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="form-group">
-                <label>&nbsp;</label><br/>
-                <button type="submit" class="btn btn-primary">Search</button>
-                <a asp-action="Index" class="btn btn-secondary">Show All Reviews</a>
-            </div>
-        </div>
-    </div>
-</form>
+    }
 
-<p><strong>@ViewBag.RecordCount</strong></p>
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
 
-@if (Model.Any())
-{
-    <table class="table table-striped table-hover">
-        <thead>
-            <tr>
-                <th>Review ID</th>
-                <th>Book</th>
-                <th>Reviewer</th>
-                <th>Rating</th>
-                <th>Review Text</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var review in Model)
-            {
-                <tr>
-                    <td>@review.ReviewID</td>
-                    <td>
-                        <a asp-controller="Books" asp-action="Details" asp-route-id="@review.BookID">
-                            @review.Book.Title
-                        </a>
-                    </td>
-                    <td>@review.Reviewer.FirstName @review.Reviewer.LastName</td>
-                    <td>@review.Rating / 5</td>
-                    <td>
-                        @if (!string.IsNullOrEmpty(review.ReviewText))
-                        {
-                            if (review.ReviewText.Length > 50)
-                            {
-                                @review.ReviewText.Substring(0, 50)
-                                <text>...</text>
-                            }
-                            else
-                            {
-                                @review.ReviewText
-                            }
-                        }
-                        else
-                        {
-                            <em class="text-muted">No review text</em>
-                        }
-                    </td>
-                    <td>
-                        @switch (review.DisputeStatus)
-                        {
-                            case Group13_Final_Project.Models.DisputeStatusEnum.Approved:
-                                <span class="badge bg-success">Approved</span>
-                                break;
-                            case Group13_Final_Project.Models.DisputeStatusEnum.Pending:
-                                <span class="badge bg-warning text-dark">Pending</span>
-                                break;
-                            case Group13_Final_Project.Models.DisputeStatusEnum.Rejected:
-                                <span class="badge bg-danger">Rejected</span>
-                                break;
-                        }
-                    </td>
-                    <td>
-                        <div class="btn-group" role="group">
-                            @if (review.DisputeStatus == Group13_Final_Project.Models.DisputeStatusEnum.Pending)
-                            {
-                                <form asp-action="Approve" asp-route-id="@review.ReviewID" method="post" style="display:inline;">
-                                    @Html.AntiForgeryToken()
-                                    <button type="submit" class="btn btn-sm btn-success" title="Approve">
-                                        <i class="bi bi-check-lg"></i>
-                                    </button>
-                                </form>
-                                <form asp-action="Reject" asp-route-id="@review.ReviewID" method="post" style="display:inline;">
-                                    @Html.AntiForgeryToken()
-                                    <button type="submit" class="btn btn-sm btn-danger" title="Reject">
-                                        <i class="bi bi-x-lg"></i>
-                                    </button>
-                                </form>
-                            }
-                            <a asp-action="Edit" asp-route-id="@review.ReviewID" class="btn btn-sm btn-primary" title="Edit">
-                                <i class="bi bi-pencil"></i>
-                            </a>
+    <!-- Tab Navigation -->
+    <ul class="nav nav-tabs mb-4" id="reviewsTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link @(activeTab == "all" ? "active" : "")" id="all-tab" data-bs-toggle="tab"
+                    data-bs-target="#all-reviews" type="button" role="tab" aria-controls="all-reviews"
+                    aria-selected="@(activeTab == "all" ? "true" : "false")">
+                <i class="bi bi-list-ul"></i> All Reviews
+                <span class="badge bg-secondary">@Model.Count()</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link @(activeTab == "approvals" ? "active" : "")" id="approvals-tab" data-bs-toggle="tab"
+                    data-bs-target="#my-approvals" type="button" role="tab" aria-controls="my-approvals"
+                    aria-selected="@(activeTab == "approvals" ? "true" : "false")">
+                <i class="bi bi-clock-history"></i> My Approval History
+                <span class="badge bg-secondary">@myApprovals.Count</span>
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="reviewsTabContent">
+        <!-- All Reviews Tab -->
+        <div class="tab-pane fade @(activeTab == "all" ? "show active" : "")" id="all-reviews" role="tabpanel" aria-labelledby="all-tab">
+            <form asp-action="Index" method="get" class="mb-4">
+                <input type="hidden" name="tab" value="all" />
+                <div class="row">
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label for="searchString">Search by Reviewer or Book:</label>
+                            <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" class="form-control" placeholder="Enter search term..."/>
                         </div>
-                    </td>
-                </tr>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="statusFilter">Filter by Status:</label>
+                            <select name="statusFilter" class="form-control">
+                                <option value="">All Statuses</option>
+                                <option value="Approved" selected="@(ViewData["CurrentStatus"]?.ToString() == "Approved")">Approved</option>
+                                <option value="Pending" selected="@(ViewData["CurrentStatus"]?.ToString() == "Pending")">Pending</option>
+                                <option value="Rejected" selected="@(ViewData["CurrentStatus"]?.ToString() == "Rejected")">Rejected</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>&nbsp;</label><br/>
+                            <button type="submit" class="btn btn-primary">Search</button>
+                            <a asp-action="Index" class="btn btn-secondary">Show All</a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <p><strong>@ViewBag.RecordCount</strong></p>
+
+            @if (Model.Any())
+            {
+                <div class="card shadow">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Review ID</th>
+                                        <th>Book</th>
+                                        <th>Reviewer</th>
+                                        <th>Rating</th>
+                                        <th>Review Text</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var review in Model)
+                                    {
+                                        <tr>
+                                            <td>@review.ReviewID</td>
+                                            <td>
+                                                <a asp-controller="Books" asp-action="Details" asp-route-id="@review.BookID">
+                                                    @review.Book.Title
+                                                </a>
+                                            </td>
+                                            <td>@review.Reviewer.FirstName @review.Reviewer.LastName</td>
+                                            <td>@review.Rating / 5</td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(review.ReviewText))
+                                                {
+                                                    if (review.ReviewText.Length > 50)
+                                                    {
+                                                        @review.ReviewText.Substring(0, 50)
+                                                        <text>...</text>
+                                                    }
+                                                    else
+                                                    {
+                                                        @review.ReviewText
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <em class="text-muted">No review text</em>
+                                                }
+                                            </td>
+                                            <td>
+                                                @switch (review.DisputeStatus)
+                                                {
+                                                    case Group13_Final_Project.Models.DisputeStatusEnum.Approved:
+                                                        <span class="badge bg-success">Approved</span>
+                                                        break;
+                                                    case Group13_Final_Project.Models.DisputeStatusEnum.Pending:
+                                                        <span class="badge bg-warning text-dark">Pending</span>
+                                                        break;
+                                                    case Group13_Final_Project.Models.DisputeStatusEnum.Rejected:
+                                                        <span class="badge bg-danger">Rejected</span>
+                                                        break;
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    @if (review.DisputeStatus == Group13_Final_Project.Models.DisputeStatusEnum.Pending)
+                                                    {
+                                                        <form asp-action="Approve" asp-route-id="@review.ReviewID" method="post" style="display:inline;">
+                                                            @Html.AntiForgeryToken()
+                                                            <button type="submit" class="btn btn-sm btn-success" title="Approve">
+                                                                <i class="bi bi-check-lg"></i>
+                                                            </button>
+                                                        </form>
+                                                        <form asp-action="Reject" asp-route-id="@review.ReviewID" method="post" style="display:inline;">
+                                                            @Html.AntiForgeryToken()
+                                                            <button type="submit" class="btn btn-sm btn-danger" title="Reject">
+                                                                <i class="bi bi-x-lg"></i>
+                                                            </button>
+                                                        </form>
+                                                    }
+                                                    <a asp-action="Edit" asp-route-id="@review.ReviewID" class="btn btn-sm btn-primary" title="Edit">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             }
-        </tbody>
-    </table>
-}
-else
-{
-    <div class="alert alert-info">
-        No reviews found matching your search criteria.
+            else
+            {
+                <div class="alert alert-info">
+                    No reviews found matching your search criteria.
+                </div>
+            }
+        </div>
+
+        <!-- My Approval History Tab -->
+        <div class="tab-pane fade @(activeTab == "approvals" ? "show active" : "")" id="my-approvals" role="tabpanel" aria-labelledby="approvals-tab">
+            <!-- Stats Cards -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body text-center">
+                            <h4>@myApprovals.Count</h4>
+                            <small>Total Reviewed</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-success text-white">
+                        <div class="card-body text-center">
+                            <h4>@ViewBag.MyApprovedCount</h4>
+                            <small>Approved</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-danger text-white">
+                        <div class="card-body text-center">
+                            <h4>@ViewBag.MyRejectedCount</h4>
+                            <small>Rejected</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (myApprovals.Any())
+            {
+                <div class="card shadow">
+                    <div class="card-body">
+                        <p class="text-muted mb-3">Showing @myApprovals.Count Reviews you've processed</p>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Book</th>
+                                        <th>Reviewer</th>
+                                        <th class="text-center">Rating</th>
+                                        <th>Review Text</th>
+                                        <th class="text-center">Decision</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var review in myApprovals)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong>@review.Book?.Title</strong><br />
+                                                <small class="text-muted">@review.Book?.Authors</small>
+                                            </td>
+                                            <td>
+                                                @review.Reviewer?.FirstName @review.Reviewer?.LastName<br />
+                                                <small class="text-muted">@review.Reviewer?.Email</small>
+                                            </td>
+                                            <td class="text-center">
+                                                @for (int i = 1; i <= 5; i++)
+                                                {
+                                                    if (i <= review.Rating)
+                                                    {
+                                                        <i class="bi bi-star-fill text-warning"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        <i class="bi bi-star text-muted"></i>
+                                                    }
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(review.ReviewText))
+                                                {
+                                                    @(review.ReviewText.Length > 100 ? review.ReviewText.Substring(0, 100) + "..." : review.ReviewText)
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">No review text</span>
+                                                }
+                                            </td>
+                                            <td class="text-center">
+                                                @if (review.DisputeStatus == Group13_Final_Project.Models.DisputeStatusEnum.Approved)
+                                                {
+                                                    <span class="badge bg-success"><i class="bi bi-check-circle"></i> Approved</span>
+                                                }
+                                                else if (review.DisputeStatus == Group13_Final_Project.Models.DisputeStatusEnum.Rejected)
+                                                {
+                                                    <span class="badge bg-danger"><i class="bi bi-x-circle"></i> Rejected</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> You haven't approved or rejected any reviews yet.
+                </div>
+            }
+        </div>
     </div>
-}
+</div>

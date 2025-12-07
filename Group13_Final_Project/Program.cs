@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Identity;
 // (For HW3 and beyond) Uncomment these lines and replace [Your_Project_Name] with the name of your project
 using Group13_Final_Project.DAL;
 using Group13_Final_Project.Models;
+using Group13_Final_Project.Seeding;
+using Group13_Final_Project.Services;
 
 //create a web application builder
 var builder = WebApplication.CreateBuilder(args);
@@ -66,6 +68,9 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+// Add email service
+builder.Services.AddScoped<IEmailService, EmailService>();
+
 //build the app
 var app = builder.Build();
 
@@ -104,5 +109,25 @@ app.Use(async (context, next) =>
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// Seed the database
+using (var scope = app.Services.CreateScope())
+{
+    var serviceProvider = scope.ServiceProvider;
+    var dbContext = serviceProvider.GetRequiredService<AppDbContext>();
+    var userManager = serviceProvider.GetRequiredService<UserManager<AppUser>>();
+    var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+    // Seed in correct order (dependencies first)
+    await SeedRoles.AddAllRoles(roleManager);
+    SeedGenres.SeedAllGenres(dbContext);
+    SeedBooks.SeedAllBooks(dbContext);
+    SeedCoupons.SeedAllCoupons(dbContext);
+    await SeedCustomers.SeedAllCustomers(userManager, dbContext);
+    await SeedEmployees.SeedAllEmployees(userManager, dbContext);
+    SeedCards.SeedAllCards(userManager, dbContext);
+    SeedOrders.SeedAllOrders(userManager, dbContext);
+    SeedReviews.SeedAllReviews(userManager, dbContext);
+}
 
 app.Run();

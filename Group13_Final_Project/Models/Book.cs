@@ -58,11 +58,11 @@ namespace Group13_Final_Project.Models
         [Display(Name = "Genre")]
         public Int32 GenreID { get; set; }
 
-        // Navigation properties
-        public Genre Genre { get; set; }
-        public List<Review> Reviews { get; set; }
-        public List<OrderDetail> OrderDetails { get; set; }
-        public List<Reorder> Reorders { get; set; }
+        // Navigation properties (nullable for EF Core)
+        public Genre? Genre { get; set; }
+        public List<Review>? Reviews { get; set; }
+        public List<OrderDetail>? OrderDetails { get; set; }
+        public List<Reorder>? Reorders { get; set; }
 
         public Book()
         {

@@ -6,6 +6,23 @@
 
 <h1>Find Books</h1>
 
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle"></i> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (User.IsInRole("Admin"))
+{
+    <div class="mb-3">
+        <a asp-action="Create" class="btn btn-success">
+            <i class="bi bi-plus-circle"></i> Add New Book
+        </a>
+    </div>
+}
+
 <form asp-action="Index" method="get" class="mb-4">
     <div class="row">
         <div class="col-md-4">
@@ -103,6 +120,21 @@
                     </td>
                     <td>
                         <a asp-action="Details" asp-route-id="@book.BookID" class="btn btn-sm btn-info">View Details</a>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <a asp-action="Edit" asp-route-id="@book.BookID" class="btn btn-sm btn-warning">Edit</a>
+                            @if (book.BookStatus == Group13_Final_Project.Models.BookStatusEnum.Active)
+                            {
+                                <a asp-action="Discontinue" asp-route-id="@book.BookID" class="btn btn-sm btn-danger">Discontinue</a>
+                            }
+                            else
+                            {
+                                <form asp-action="Reactivate" asp-route-id="@book.BookID" method="post" style="display:inline;">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-success">Reactivate</button>
+                                </form>
+                            }
+                        }
                     </td>
                 </tr>
             }

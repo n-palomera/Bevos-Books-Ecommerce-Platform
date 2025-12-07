@@ -1,0 +1,106 @@
+@model Group13_Final_Project.Models.Coupon
+
+@{
+    ViewData["Title"] = "Coupon Details";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-tag"></i> Coupon: @Model.CouponCode</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Coupon Type</h6>
+                            @if (Model.CouponType == CouponTypeEnum.PercentOff)
+                            {
+                                <span class="badge bg-success fs-6">
+                                    <i class="bi bi-percent"></i> @Model.DiscountPercent% Off
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-info fs-6">
+                                    <i class="bi bi-truck"></i> Free Shipping
+                                    @if (Model.FreeThreshold.HasValue)
+                                    {
+                                        <span>(orders over @Model.FreeThreshold.Value.ToString("C"))</span>
+                                    }
+                                </span>
+                            }
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Status</h6>
+                            @if (Model.Status)
+                            {
+                                <span class="badge bg-success fs-6">Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary fs-6">Disabled</span>
+                            }
+                        </div>
+                    </div>
+
+                    <h5 class="mb-3">Usage History (@Model.Orders.Count uses)</h5>
+                    @if (Model.Orders.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Order #</th>
+                                        <th>Customer</th>
+                                        <th>Order Date</th>
+                                        <th class="text-end">Order Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var order in Model.Orders.OrderByDescending(o => o.OrderDate))
+                                    {
+                                        <tr>
+                                            <td>@order.OrderNumber</td>
+                                            <td>@order.Customer?.FirstName @order.Customer?.LastName</td>
+                                            <td>@order.OrderDate.ToString("MM/dd/yyyy")</td>
+                                            <td class="text-end">@order.Total.ToString("C")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> This coupon has not been used yet.
+                        </div>
+                    }
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Back to List
+                        </a>
+                        <form asp-action="ToggleStatus" asp-route-id="@Model.CouponID" method="post">
+                            @if (Model.Status)
+                            {
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="bi bi-pause-circle"></i> Disable Coupon
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="submit" class="btn btn-success">
+                                    <i class="bi bi-play-circle"></i> Enable Coupon
+                                </button>
+                            }
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

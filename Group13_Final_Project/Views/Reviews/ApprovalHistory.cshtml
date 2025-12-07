@@ -1,0 +1,139 @@
+@model IEnumerable<Group13_Final_Project.Models.Review>
+
+@{
+    ViewData["Title"] = "My Review Approval History";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-clock-history"></i> My Review Approval History</h2>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Reviews
+        </a>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h4>@Model.Count()</h4>
+                    <small>Total Reviewed</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h4>@ViewBag.ApprovedCount</h4>
+                    <small>Approved</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-danger text-white">
+                <div class="card-body text-center">
+                    <h4>@ViewBag.RejectedCount</h4>
+                    <small>Rejected</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-header bg-light">
+            <form asp-action="ApprovalHistory" method="get" class="row g-3">
+                <div class="col-md-4">
+                    <select name="statusFilter" class="form-select">
+                        <option value="">All Decisions</option>
+                        <option value="Approved" selected="@(ViewData["CurrentStatus"]?.ToString() == "Approved")">Approved Only</option>
+                        <option value="Rejected" selected="@(ViewData["CurrentStatus"]?.ToString() == "Rejected")">Rejected Only</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="bi bi-filter"></i> Filter
+                    </button>
+                    <a asp-action="ApprovalHistory" class="btn btn-outline-secondary">Clear</a>
+                </div>
+            </form>
+        </div>
+        <div class="card-body">
+            <p class="text-muted mb-3">@ViewBag.RecordCount</p>
+
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>
+                                    <a asp-action="ApprovalHistory" asp-route-sortOrder="@ViewData["BookSort"]" asp-route-statusFilter="@ViewData["CurrentStatus"]" class="text-white text-decoration-none">
+                                        Book <i class="bi bi-arrow-down-up"></i>
+                                    </a>
+                                </th>
+                                <th>Reviewer</th>
+                                <th class="text-center">Rating</th>
+                                <th>Review Text</th>
+                                <th class="text-center">Decision</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var review in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@review.Book?.Title</strong><br />
+                                        <small class="text-muted">@review.Book?.Authors</small>
+                                    </td>
+                                    <td>
+                                        @review.Reviewer?.FirstName @review.Reviewer?.LastName<br />
+                                        <small class="text-muted">@review.Reviewer?.Email</small>
+                                    </td>
+                                    <td class="text-center">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            if (i <= review.Rating)
+                                            {
+                                                <i class="bi bi-star-fill text-warning"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="bi bi-star text-muted"></i>
+                                            }
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(review.ReviewText))
+                                        {
+                                            @(review.ReviewText.Length > 100 ? review.ReviewText.Substring(0, 100) + "..." : review.ReviewText)
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">No review text</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        @if (review.DisputeStatus == Group13_Final_Project.Models.DisputeStatusEnum.Approved)
+                                        {
+                                            <span class="badge bg-success"><i class="bi bi-check-circle"></i> Approved</span>
+                                        }
+                                        else if (review.DisputeStatus == Group13_Final_Project.Models.DisputeStatusEnum.Rejected)
+                                        {
+                                            <span class="badge bg-danger"><i class="bi bi-x-circle"></i> Rejected</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> You haven't approved or rejected any reviews yet.
+                </div>
+            }
+        </div>
+    </div>
+</div>

@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Group13_Final_Project.DAL;
 using Group13_Final_Project.Models;
 using Group13_Final_Project.Utilities;
+using Group13_Final_Project.Services;
 using System;
 using System.Linq;
 
@@ -17,13 +18,15 @@ namespace Group13_Final_Project.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly PasswordValidator<AppUser> _passwordValidator;
         private readonly AppDbContext _context;
+        private readonly IEmailService _emailService;
 
-        public AccountController(AppDbContext appDbContext, UserManager<AppUser> userManager, SignInManager<AppUser> signIn)
+        public AccountController(AppDbContext appDbContext, UserManager<AppUser> userManager, SignInManager<AppUser> signIn, IEmailService emailService)
         {
             _context = appDbContext;
             _userManager = userManager;
             _signInManager = signIn;
             _passwordValidator = (PasswordValidator<AppUser>)userManager.PasswordValidators.FirstOrDefault();
+            _emailService = emailService;
         }
 
         // GET: /Account/Register
@@ -71,7 +74,8 @@ namespace Group13_Final_Project.Controllers
 
             if (result.Succeeded)
             {
-                // TODO: Send welcome email here
+                // Send welcome email
+                await _emailService.SendWelcomeEmailAsync(rvm.Email, rvm.FirstName);
 
                 // Sign in the new user
                 Microsoft.AspNetCore.Identity.SignInResult result2 = await _signInManager.PasswordSignInAsync(rvm.Email, rvm.Password, false, lockoutOnFailure: false);
@@ -262,7 +266,8 @@ namespace Group13_Final_Project.Controllers
 
             if (result.Succeeded)
             {
-                // TODO: Send password change confirmation email here
+                // Send password change confirmation email
+                await _emailService.SendPasswordChangedEmailAsync(userLoggedIn.Email, userLoggedIn.FirstName);
 
                 await _signInManager.SignInAsync(userLoggedIn, isPersistent: false);
                 return RedirectToAction("Index", "Home");

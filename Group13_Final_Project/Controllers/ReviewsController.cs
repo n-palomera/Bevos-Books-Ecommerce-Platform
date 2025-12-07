@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Group13_Final_Project.DAL;
 using Group13_Final_Project.Models;
@@ -12,18 +13,21 @@ namespace Group13_Final_Project.Controllers
     public class ReviewsController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly UserManager<AppUser> _userManager;
 
-        public ReviewsController(AppDbContext context)
+        public ReviewsController(AppDbContext context, UserManager<AppUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Reviews (Employee/Admin view all reviews)
         [Authorize(Roles = "Employee,Admin")]
-        public async Task<IActionResult> Index(string searchString, string statusFilter)
+        public async Task<IActionResult> Index(string searchString, string statusFilter, string tab)
         {
             ViewData["CurrentFilter"] = searchString;
             ViewData["CurrentStatus"] = statusFilter;
+            ViewData["ActiveTab"] = tab ?? "all";
 
             var reviews = _context.Reviews
                 .Include(r => r.Reviewer)
@@ -62,6 +66,29 @@ namespace Group13_Final_Project.Controllers
 
             // Record count for display
             ViewBag.RecordCount = $"Showing {reviewList.Count} Reviews";
+
+            // Get current user's approval history for the "My Approvals" tab
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser != null)
+            {
+                var myApprovals = await _context.Reviews
+                    .Include(r => r.Book)
+                    .Include(r => r.Reviewer)
+                    .Where(r => r.ApproverID == currentUser.Id &&
+                        (r.DisputeStatus == DisputeStatusEnum.Approved || r.DisputeStatus == DisputeStatusEnum.Rejected))
+                    .OrderByDescending(r => r.ReviewID)
+                    .ToListAsync();
+
+                ViewBag.MyApprovals = myApprovals;
+                ViewBag.MyApprovedCount = myApprovals.Count(r => r.DisputeStatus == DisputeStatusEnum.Approved);
+                ViewBag.MyRejectedCount = myApprovals.Count(r => r.DisputeStatus == DisputeStatusEnum.Rejected);
+            }
+            else
+            {
+                ViewBag.MyApprovals = new List<Review>();
+                ViewBag.MyApprovedCount = 0;
+                ViewBag.MyRejectedCount = 0;
+            }
 
             return View(reviewList);
         }
@@ -336,6 +363,65 @@ namespace Group13_Final_Project.Controllers
             viewModel.Rating = fullReview?.Rating ?? 0;
 
             return View(viewModel);
+        }
+
+        // GET: Reviews/ApprovalHistory (Shows reviews approved/rejected by current employee/admin)
+        [Authorize(Roles = "Employee,Admin")]
+        public async Task<IActionResult> ApprovalHistory(string statusFilter, string sortOrder)
+        {
+            ViewData["CurrentStatus"] = statusFilter;
+            ViewData["DateSort"] = string.IsNullOrEmpty(sortOrder) ? "date_asc" : "";
+            ViewData["BookSort"] = sortOrder == "book" ? "book_desc" : "book";
+            ViewData["CurrentSort"] = sortOrder;
+
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return NotFound();
+            }
+
+            var reviewsQuery = _context.Reviews
+                .Include(r => r.Book)
+                .Include(r => r.Reviewer)
+                .Where(r => r.ApproverID == currentUser.Id)
+                .AsQueryable();
+
+            // Filter by status
+            if (!string.IsNullOrEmpty(statusFilter))
+            {
+                if (statusFilter == "Approved")
+                {
+                    reviewsQuery = reviewsQuery.Where(r => r.DisputeStatus == DisputeStatusEnum.Approved);
+                }
+                else if (statusFilter == "Rejected")
+                {
+                    reviewsQuery = reviewsQuery.Where(r => r.DisputeStatus == DisputeStatusEnum.Rejected);
+                }
+            }
+            else
+            {
+                // By default, show only approved or rejected (not pending)
+                reviewsQuery = reviewsQuery.Where(r =>
+                    r.DisputeStatus == DisputeStatusEnum.Approved ||
+                    r.DisputeStatus == DisputeStatusEnum.Rejected);
+            }
+
+            var reviews = await reviewsQuery.ToListAsync();
+
+            // Apply sorting
+            reviews = sortOrder switch
+            {
+                "date_asc" => reviews.OrderBy(r => r.ReviewID).ToList(),
+                "book" => reviews.OrderBy(r => r.Book?.Title).ToList(),
+                "book_desc" => reviews.OrderByDescending(r => r.Book?.Title).ToList(),
+                _ => reviews.OrderByDescending(r => r.ReviewID).ToList() // Default: most recent first
+            };
+
+            ViewBag.RecordCount = $"Showing {reviews.Count} Reviews";
+            ViewBag.ApprovedCount = reviews.Count(r => r.DisputeStatus == DisputeStatusEnum.Approved);
+            ViewBag.RejectedCount = reviews.Count(r => r.DisputeStatus == DisputeStatusEnum.Rejected);
+
+            return View(reviews);
         }
     }
 }

@@ -1,0 +1,146 @@
+@model Group13_Final_Project.Models.Book
+
+@{
+    ViewData["Title"] = "Edit Book";
+}
+
+<h1>Edit Book</h1>
+<p class="text-muted">Update book information (Admin Only)</p>
+
+<hr />
+
+<div class="row">
+    <div class="col-md-8">
+        <form asp-action="Edit" method="post">
+            <div asp-validation-summary="All" class="text-danger mb-3"></div>
+            <input type="hidden" asp-for="BookID" />
+            <input type="hidden" asp-for="BookNumber" />
+
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Book Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-secondary">
+                        <strong>Book Number:</strong> @Model.BookNumber (cannot be changed)
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="Title" class="control-label"><strong>Title</strong></label>
+                        <input asp-for="Title" class="form-control" />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="Authors" class="control-label"><strong>Authors</strong></label>
+                        <input asp-for="Authors" class="form-control" />
+                        <span asp-validation-for="Authors" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="Description" class="control-label">Description</label>
+                        <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="GenreID" class="control-label"><strong>Genre</strong></label>
+                                <select asp-for="GenreID" class="form-control" asp-items="ViewBag.GenreID">
+                                    <option value="">-- Select Genre --</option>
+                                </select>
+                                <span asp-validation-for="GenreID" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="control-label">Or Add New Genre</label>
+                                <input type="text" name="newGenre" class="form-control" placeholder="Enter new genre name" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="PublishDate" class="control-label"><strong>Publish Date</strong></label>
+                        <input asp-for="PublishDate" class="form-control" type="date" />
+                        <span asp-validation-for="PublishDate" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="BookStatus" class="control-label"><strong>Status</strong></label>
+                        <select asp-for="BookStatus" class="form-control" asp-items="Html.GetEnumSelectList<Group13_Final_Project.Models.BookStatusEnum>()">
+                        </select>
+                        <span asp-validation-for="BookStatus" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Pricing & Inventory</h5>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.LastCostPaid != null)
+                    {
+                        <div class="alert alert-info">
+                            <strong>Last Cost Paid:</strong> @String.Format("{0:C}", ViewBag.LastCostPaid)
+                            @if (ViewBag.AverageProfitMargin != null && (decimal)ViewBag.AverageProfitMargin > 0)
+                            {
+                                <br /><strong>Average Profit Margin:</strong> @String.Format("{0:C}", ViewBag.AverageProfitMargin)
+                            }
+                        </div>
+                    }
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="Price" class="control-label"><strong>Price ($)</strong></label>
+                                <input asp-for="Price" class="form-control" type="number" step="0.01" min="0" />
+                                <span asp-validation-for="Price" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="Cost" class="control-label"><strong>Cost ($)</strong></label>
+                                <input asp-for="Cost" class="form-control" type="number" step="0.01" min="0" />
+                                <span asp-validation-for="Cost" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="InventoryQuantity" class="control-label"><strong>Inventory Quantity</strong></label>
+                                <input asp-for="InventoryQuantity" class="form-control" type="number" min="0" />
+                                <span asp-validation-for="InventoryQuantity" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="ReorderPoint" class="control-label"><strong>Reorder Point</strong></label>
+                                <input asp-for="ReorderPoint" class="form-control" type="number" min="0" />
+                                <small class="text-muted">Alert when inventory falls below this</small>
+                                <span asp-validation-for="ReorderPoint" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary btn-lg">Save Changes</button>
+                <a asp-action="Index" class="btn btn-secondary btn-lg">Cancel</a>
+                @if (Model.BookStatus == Group13_Final_Project.Models.BookStatusEnum.Active)
+                {
+                    <a asp-action="Discontinue" asp-route-id="@Model.BookID" class="btn btn-danger btn-lg">Discontinue Book</a>
+                }
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

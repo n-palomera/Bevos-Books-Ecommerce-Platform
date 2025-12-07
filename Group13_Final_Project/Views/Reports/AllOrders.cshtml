@@ -1,0 +1,120 @@
+@model IEnumerable<Group13_Final_Project.Models.ViewModels.OrderReportViewModel>
+
+@{
+    ViewData["Title"] = "All Orders Report";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-cart"></i> All Orders Report</h2>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Reports
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header bg-light">
+            <form asp-action="AllOrders" method="get" class="row g-3">
+                <div class="col-md-4">
+                    <select name="statusFilter" class="form-select">
+                        <option value="">All Status</option>
+                        <option value="Pending" selected="@(ViewData["CurrentStatus"]?.ToString() == "Pending")">Pending</option>
+                        <option value="Shipped" selected="@(ViewData["CurrentStatus"]?.ToString() == "Shipped")">Shipped</option>
+                        <option value="Delivered" selected="@(ViewData["CurrentStatus"]?.ToString() == "Delivered")">Delivered</option>
+                        <option value="Cancelled" selected="@(ViewData["CurrentStatus"]?.ToString() == "Cancelled")">Cancelled</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="bi bi-filter"></i> Filter
+                    </button>
+                    <a asp-action="AllOrders" class="btn btn-outline-secondary">Clear</a>
+                </div>
+            </form>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <p class="text-muted mb-0">@ViewBag.RecordCount</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <strong>Total Revenue: @(((decimal)ViewBag.TotalRevenue).ToString("C"))</strong>
+                </div>
+            </div>
+
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Order #</th>
+                                <th>
+                                    <a asp-action="AllOrders" asp-route-sortOrder="@ViewData["DateSort"]" asp-route-statusFilter="@ViewData["CurrentStatus"]" class="text-white text-decoration-none">
+                                        Date <i class="bi bi-arrow-down-up"></i>
+                                    </a>
+                                </th>
+                                <th>
+                                    <a asp-action="AllOrders" asp-route-sortOrder="@ViewData["CustomerSort"]" asp-route-statusFilter="@ViewData["CurrentStatus"]" class="text-white text-decoration-none">
+                                        Customer <i class="bi bi-arrow-down-up"></i>
+                                    </a>
+                                </th>
+                                <th class="text-center">Items</th>
+                                <th class="text-end">Subtotal</th>
+                                <th class="text-end">Discount</th>
+                                <th class="text-end">Shipping</th>
+                                <th class="text-end">
+                                    <a asp-action="AllOrders" asp-route-sortOrder="@ViewData["TotalSort"]" asp-route-statusFilter="@ViewData["CurrentStatus"]" class="text-white text-decoration-none">
+                                        Total <i class="bi bi-arrow-down-up"></i>
+                                    </a>
+                                </th>
+                                <th class="text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td><strong>@item.OrderNumber</strong></td>
+                                    <td>@item.OrderDate.ToString("MM/dd/yyyy")</td>
+                                    <td>
+                                        @item.CustomerName<br />
+                                        <small class="text-muted">@item.CustomerEmail</small>
+                                    </td>
+                                    <td class="text-center">@item.ItemCount</td>
+                                    <td class="text-end">@item.Subtotal.ToString("C")</td>
+                                    <td class="text-end text-danger">-@item.Discount.ToString("C")</td>
+                                    <td class="text-end">@item.Shipping.ToString("C")</td>
+                                    <td class="text-end"><strong>@item.Total.ToString("C")</strong></td>
+                                    <td class="text-center">
+                                        @switch (item.Status)
+                                        {
+                                            case "Pending":
+                                                <span class="badge bg-warning text-dark">Pending</span>
+                                                break;
+                                            case "Shipped":
+                                                <span class="badge bg-info">Shipped</span>
+                                                break;
+                                            case "Delivered":
+                                                <span class="badge bg-success">Delivered</span>
+                                                break;
+                                            case "Cancelled":
+                                                <span class="badge bg-danger">Cancelled</span>
+                                                break;
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> No orders found.
+                </div>
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,100 @@
+@model IEnumerable<Group13_Final_Project.Models.Book>
+
+@{
+    ViewData["Title"] = "Manual Reorder";
+    var genres = ViewBag.Genres as List<Group13_Final_Project.Models.Genre>;
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-hand-index"></i> Manual Reorder</h2>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header bg-light">
+            <form asp-action="ManualOrder" method="get" class="row g-3">
+                <div class="col-md-4">
+                    <input type="text" name="searchString" value="@ViewData["CurrentFilter"]"
+                           class="form-control" placeholder="Search by title, author, or book #..." />
+                </div>
+                <div class="col-md-3">
+                    <select name="genreId" class="form-select">
+                        <option value="">All Genres</option>
+                        @if (genres != null)
+                        {
+                            @foreach (var genre in genres)
+                            {
+                                <option value="@genre.GenreID" selected="@(ViewData["CurrentGenre"]?.ToString() == genre.GenreID.ToString())">
+                                    @genre.GenreName
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select name="sortOrder" class="form-select">
+                        <option value="">Sort by Title</option>
+                        <option value="author" selected="@(ViewData["CurrentSort"]?.ToString() == "author")">Sort by Author</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="bi bi-search"></i> Search
+                    </button>
+                </div>
+            </form>
+        </div>
+        <div class="card-body">
+            <p class="text-muted mb-3">@ViewBag.RecordCount</p>
+
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Book #</th>
+                                <th>Title</th>
+                                <th>Author</th>
+                                <th>Genre</th>
+                                <th class="text-center">Inventory</th>
+                                <th class="text-center">Reorder Point</th>
+                                <th class="text-end">Cost</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var book in Model)
+                            {
+                                var needsReorder = book.InventoryQuantity <= book.ReorderPoint;
+                                <tr class="@(needsReorder ? "table-warning" : "")">
+                                    <td>@book.BookNumber</td>
+                                    <td><strong>@book.Title</strong></td>
+                                    <td>@book.Authors</td>
+                                    <td>@book.Genre?.GenreName</td>
+                                    <td class="text-center">@book.InventoryQuantity</td>
+                                    <td class="text-center">@book.ReorderPoint</td>
+                                    <td class="text-end">@book.Cost.ToString("C")</td>
+                                    <td class="text-center">
+                                        <a asp-action="CreateManual" asp-route-id="@book.BookID" class="btn btn-sm btn-primary">
+                                            <i class="bi bi-plus-lg"></i> Order
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> No books found.
+                </div>
+            }
+        </div>
+    </div>
+</div>

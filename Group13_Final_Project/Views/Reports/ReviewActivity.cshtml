@@ -1,0 +1,109 @@
+@model IEnumerable<Group13_Final_Project.Models.ViewModels.ReviewActivityReportViewModel>
+
+@{
+    ViewData["Title"] = "Review Activity Report";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-star"></i> Review Activity Report</h2>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Reports
+        </a>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h4>@Model.Count()</h4>
+                    <small>Total Employees</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h4>@ViewBag.TotalApproved</h4>
+                    <small>Reviews Approved</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-danger text-white">
+                <div class="card-body text-center">
+                    <h4>@ViewBag.TotalRejected</h4>
+                    <small>Reviews Rejected</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-body">
+            <p class="text-muted mb-3">@ViewBag.RecordCount</p>
+
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>
+                                    <a asp-action="ReviewActivity" asp-route-sortOrder="@ViewData["NameSort"]" class="text-white text-decoration-none">
+                                        Employee <i class="bi bi-arrow-down-up"></i>
+                                    </a>
+                                </th>
+                                <th>Email</th>
+                                <th class="text-center">Role</th>
+                                <th class="text-center">
+                                    <a asp-action="ReviewActivity" asp-route-sortOrder="@ViewData["ApprovedSort"]" class="text-white text-decoration-none">
+                                        Approved <i class="bi bi-arrow-down-up"></i>
+                                    </a>
+                                </th>
+                                <th class="text-center">
+                                    <a asp-action="ReviewActivity" asp-route-sortOrder="@ViewData["RejectedSort"]" class="text-white text-decoration-none">
+                                        Rejected <i class="bi bi-arrow-down-up"></i>
+                                    </a>
+                                </th>
+                                <th class="text-center">
+                                    <a asp-action="ReviewActivity" asp-route-sortOrder="@ViewData["TotalSort"]" class="text-white text-decoration-none">
+                                        Total <i class="bi bi-arrow-down-up"></i>
+                                    </a>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td><strong>@item.EmployeeName</strong></td>
+                                    <td>@item.Email</td>
+                                    <td class="text-center">
+                                        @if (item.Role == "Admin")
+                                        {
+                                            <span class="badge bg-danger">Admin</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-primary">Employee</span>
+                                        }
+                                    </td>
+                                    <td class="text-center text-success"><strong>@item.ReviewsApproved</strong></td>
+                                    <td class="text-center text-danger"><strong>@item.ReviewsRejected</strong></td>
+                                    <td class="text-center"><strong>@item.TotalReviewsProcessed</strong></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> No review activity data available.
+                </div>
+            }
+        </div>
+    </div>
+</div>

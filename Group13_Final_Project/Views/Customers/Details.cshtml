@@ -1,0 +1,204 @@
+@model Group13_Final_Project.Models.AppUser
+
+@{
+    ViewData["Title"] = "Customer Details";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="bi bi-person"></i> @Model.FirstName @Model.LastName</h4>
+                    @if (Model.Status)
+                    {
+                        <span class="badge bg-success">Active</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">Disabled</span>
+                    }
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Contact Information</h6>
+                            <p><strong>Email:</strong> @Model.Email</p>
+                            <p><strong>Phone:</strong> @Model.PhoneNumber</p>
+                            @if (Model.Birthday.HasValue)
+                            {
+                                <p><strong>Birthday:</strong> @Model.Birthday.Value.ToString("MMMM d, yyyy")</p>
+                            }
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Address</h6>
+                            <p>@Model.Address</p>
+                            <p>@Model.City, @Model.State @Model.ZipCode</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                        <i class="bi bi-pencil"></i> Edit
+                    </a>
+                    <form asp-action="ToggleStatus" asp-route-id="@Model.Id" method="post" class="d-inline">
+                        @if (Model.Status)
+                        {
+                            <button type="submit" class="btn btn-warning">
+                                <i class="bi bi-person-x"></i> Disable Account
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-person-check"></i> Enable Account
+                            </button>
+                        }
+                    </form>
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to List
+                    </a>
+                </div>
+            </div>
+
+            <!-- Order History -->
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-bag-check"></i> Order History (@Model.Orders.Count orders)</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Orders.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Order #</th>
+                                        <th>Date</th>
+                                        <th>Items</th>
+                                        <th class="text-end">Total</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var order in Model.Orders.OrderByDescending(o => o.OrderDate).Take(10))
+                                    {
+                                        <tr>
+                                            <td>@order.OrderNumber</td>
+                                            <td>@order.OrderDate.ToString("MM/dd/yyyy")</td>
+                                            <td>@order.OrderDetails.Sum(od => od.Quantity)</td>
+                                            <td class="text-end">@order.Total.ToString("C")</td>
+                                            <td>
+                                                @switch (order.OrderStatus)
+                                                {
+                                                    case OrderStatusEnum.Pending:
+                                                        <span class="badge bg-warning text-dark">Pending</span>
+                                                        break;
+                                                    case OrderStatusEnum.Shipped:
+                                                        <span class="badge bg-info">Shipped</span>
+                                                        break;
+                                                    case OrderStatusEnum.Delivered:
+                                                        <span class="badge bg-success">Delivered</span>
+                                                        break;
+                                                    case OrderStatusEnum.Cancelled:
+                                                        <span class="badge bg-secondary">Cancelled</span>
+                                                        break;
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        @if (Model.Orders.Count > 10)
+                        {
+                            <p class="text-muted small">Showing 10 most recent orders of @Model.Orders.Count total.</p>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted">No orders yet.</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Payment Cards -->
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-credit-card"></i> Payment Cards (@Model.Cards.Count)</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Cards.Any())
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var card in Model.Cards)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>@card.CardType</span>
+                                    <span class="text-muted">@card.MaskedCardNumber</span>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No payment cards on file.</p>
+                    }
+                </div>
+            </div>
+
+            <!-- Reviews -->
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-star"></i> Reviews (@Model.Reviews.Count)</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Reviews.Any())
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var review in Model.Reviews.OrderByDescending(r => r.ReviewID).Take(5))
+                            {
+                                <li class="list-group-item">
+                                    <div class="d-flex justify-content-between">
+                                        <span>
+                                            @for (int i = 0; i < review.Rating; i++)
+                                            {
+                                                <i class="bi bi-star-fill text-warning"></i>
+                                            }
+                                        </span>
+                                        @switch (review.DisputeStatus)
+                                        {
+                                            case DisputeStatusEnum.Pending:
+                                                <span class="badge bg-warning text-dark">Pending</span>
+                                                break;
+                                            case DisputeStatusEnum.Approved:
+                                                <span class="badge bg-success">Approved</span>
+                                                break;
+                                            case DisputeStatusEnum.Rejected:
+                                                <span class="badge bg-danger">Rejected</span>
+                                                break;
+                                        }
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(review.ReviewText))
+                                    {
+                                        <small class="text-muted">@review.ReviewText</small>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                        @if (Model.Reviews.Count > 5)
+                        {
+                            <p class="text-muted small mt-2">Showing 5 most recent reviews.</p>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted">No reviews yet.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,65 @@
+@{
+    ViewData["Title"] = "Inventory Reorders";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4"><i class="bi bi-box-seam"></i> Inventory Reorders</h2>
+
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        <div class="col">
+            <div class="card h-100 shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-hand-index"></i> Manual Order</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Browse all books and manually place reorders for specific titles.</p>
+                    <a asp-action="ManualOrder" class="btn btn-primary">
+                        <i class="bi bi-search"></i> Browse Books
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card h-100 shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="bi bi-lightning"></i> Automatic Order</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">View books below reorder point and place bulk orders automatically.</p>
+                    <a asp-action="AutomaticOrder" class="btn btn-warning">
+                        <i class="bi bi-arrow-repeat"></i> Auto Reorder
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card h-100 shadow">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-list-check"></i> View Orders</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">View all pending and partially received reorders.</p>
+                    <a asp-action="ViewOrders" class="btn btn-info">
+                        <i class="bi bi-eye"></i> View Orders
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card h-100 shadow">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-box-arrow-in-down"></i> Receive Inventory</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Receive ordered books and update inventory quantities.</p>
+                    <a asp-action="Receive" class="btn btn-success">
+                        <i class="bi bi-check2-square"></i> Receive Books
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

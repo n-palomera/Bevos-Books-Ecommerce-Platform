@@ -31,7 +31,7 @@ namespace Group13_Final_Project.Seeding
                     Status = true
                 },
                 Password = "dewey4",
-                RoleName = "Manager"
+                RoleName = "Admin"
             });
 
             Employees.Add(new AddUserModel
@@ -373,7 +373,7 @@ namespace Group13_Final_Project.Seeding
                     Status = true
                 },
                 Password = "arched",
-                RoleName = "Manager"
+                RoleName = "Admin"
             });
 
             Employees.Add(new AddUserModel
@@ -392,7 +392,7 @@ namespace Group13_Final_Project.Seeding
                     Status = true
                 },
                 Password = "lottery",
-                RoleName = "Manager"
+                RoleName = "Admin"
             });
 
             Employees.Add(new AddUserModel
@@ -430,7 +430,7 @@ namespace Group13_Final_Project.Seeding
                     Status = true
                 },
                 Password = "offbeat",
-                RoleName = "Manager"
+                RoleName = "Admin"
             });
 
             Employees.Add(new AddUserModel
@@ -544,7 +544,7 @@ namespace Group13_Final_Project.Seeding
                     Status = true
                 },
                 Password = "landus",
-                RoleName = "Manager"
+                RoleName = "Admin"
             });
 
             // UPSERT: Add or update each employee
@@ -571,6 +571,18 @@ namespace Group13_Final_Project.Seeding
                     dbUser.ZipCode = employeeToAdd.User.ZipCode;
                     dbUser.PhoneNumber = employeeToAdd.User.PhoneNumber;
                     await userManager.UpdateAsync(dbUser);
+
+                    // Also update role if not already in correct role
+                    if (!await userManager.IsInRoleAsync(dbUser, employeeToAdd.RoleName))
+                    {
+                        // Remove from old roles first
+                        var currentRoles = await userManager.GetRolesAsync(dbUser);
+                        if (currentRoles.Any())
+                        {
+                            await userManager.RemoveFromRolesAsync(dbUser, currentRoles);
+                        }
+                        await userManager.AddToRoleAsync(dbUser, employeeToAdd.RoleName);
+                    }
                 }
             }
         }

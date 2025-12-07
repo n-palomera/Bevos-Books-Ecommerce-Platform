@@ -1,0 +1,131 @@
+@model IEnumerable<Group13_Final_Project.Models.ViewModels.InventoryReportViewModel>
+
+@{
+    ViewData["Title"] = "Current Inventory Report";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-boxes"></i> Current Inventory Report</h2>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Reports
+        </a>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h4>@ViewBag.TotalUnits</h4>
+                    <small>Total Units</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h4>@(((decimal)ViewBag.TotalInventoryValue).ToString("C"))</h4>
+                    <small>Inventory Value (Cost)</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h4>@(((decimal)ViewBag.TotalPotentialRevenue).ToString("C"))</h4>
+                    <small>Potential Revenue</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header bg-light">
+            <form asp-action="CurrentInventory" method="get" class="row g-3">
+                <div class="col-md-4">
+                    <select name="filter" class="form-select">
+                        <option value="">All Books</option>
+                        <option value="active" selected="@(ViewData["CurrentFilter"]?.ToString() == "active")">Active Only</option>
+                        <option value="discontinued" selected="@(ViewData["CurrentFilter"]?.ToString() == "discontinued")">Discontinued Only</option>
+                        <option value="reorder" selected="@(ViewData["CurrentFilter"]?.ToString() == "reorder")">Needs Reorder</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="bi bi-filter"></i> Filter
+                    </button>
+                    <a asp-action="CurrentInventory" class="btn btn-outline-secondary">Clear</a>
+                </div>
+            </form>
+        </div>
+        <div class="card-body">
+            <p class="text-muted mb-3">@ViewBag.RecordCount</p>
+
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>
+                                    <a asp-action="CurrentInventory" asp-route-sortOrder="@ViewData["TitleSort"]" asp-route-filter="@ViewData["CurrentFilter"]" class="text-white text-decoration-none">
+                                        Title <i class="bi bi-arrow-down-up"></i>
+                                    </a>
+                                </th>
+                                <th>Author</th>
+                                <th>Genre</th>
+                                <th class="text-center">
+                                    <a asp-action="CurrentInventory" asp-route-sortOrder="@ViewData["QuantitySort"]" asp-route-filter="@ViewData["CurrentFilter"]" class="text-white text-decoration-none">
+                                        Qty <i class="bi bi-arrow-down-up"></i>
+                                    </a>
+                                </th>
+                                <th class="text-end">Price</th>
+                                <th class="text-end">Cost</th>
+                                <th class="text-end">
+                                    <a asp-action="CurrentInventory" asp-route-sortOrder="@ViewData["ValueSort"]" asp-route-filter="@ViewData["CurrentFilter"]" class="text-white text-decoration-none">
+                                        Value <i class="bi bi-arrow-down-up"></i>
+                                    </a>
+                                </th>
+                                <th class="text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr class="@(item.IsDiscontinued ? "table-secondary" : (item.NeedsReorder ? "table-warning" : ""))">
+                                    <td><strong>@item.Title</strong></td>
+                                    <td>@item.Author</td>
+                                    <td>@item.Genre</td>
+                                    <td class="text-center">@item.Quantity</td>
+                                    <td class="text-end">@item.Price.ToString("C")</td>
+                                    <td class="text-end">@item.Cost.ToString("C")</td>
+                                    <td class="text-end">@item.InventoryValue.ToString("C")</td>
+                                    <td class="text-center">
+                                        @if (item.IsDiscontinued)
+                                        {
+                                            <span class="badge bg-secondary">Discontinued</span>
+                                        }
+                                        else if (item.NeedsReorder)
+                                        {
+                                            <span class="badge bg-warning text-dark">Reorder</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">In Stock</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> No inventory data available.
+                </div>
+            }
+        </div>
+    </div>
+</div>
