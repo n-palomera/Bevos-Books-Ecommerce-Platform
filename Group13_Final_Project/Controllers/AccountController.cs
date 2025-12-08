@@ -217,12 +217,23 @@ namespace Group13_Final_Project.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(EditProfileViewModel epvm)
         {
-            if (ModelState.IsValid == false)
+            // Debug: Check if we're receiving the POST
+            if (!ModelState.IsValid)
             {
+                // Get user for email display
+                String user1 = User.Identity.Name;
+                AppUser dbUser = await _context.Users.FirstOrDefaultAsync(u => u.UserName == user1);
+                if (dbUser != null)
+                {
+                    epvm.UserID = dbUser.Id;
+                    epvm.Email = dbUser.Email;
+                }
                 return View(epvm);
             }
 
-            AppUser user = await _context.Users.FirstOrDefaultAsync(u => u.Id == epvm.UserID);
+            // Get the logged-in user from the database
+            String username = User.Identity.Name;
+            AppUser user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == username);
 
             if (user == null)
             {
@@ -239,9 +250,11 @@ namespace Group13_Final_Project.Controllers
             user.PhoneNumber = epvm.PhoneNumber;
             user.Birthday = epvm.Birthday;
 
-            _context.Update(user);
+            // Explicitly mark entity as modified and save
+            _context.Entry(user).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
             await _context.SaveChangesAsync();
 
+            TempData["SuccessMessage"] = "Profile updated successfully!";
             return RedirectToAction("Index");
         }
 
@@ -381,15 +394,18 @@ namespace Group13_Final_Project.Controllers
             List<Book> recommendations = new List<Book>();
 
             // 1. Same author, same genre, not purchased
-            var sameAuthorGenre = await _context.Books
+            var sameAuthorGenreBooks = await _context.Books
                 .Include(b => b.Reviews)
                 .Where(b => b.Authors == purchasedBook.Authors
                     && b.GenreID == purchasedBook.GenreID
                     && b.BookID != purchasedBook.BookID
                     && !customerBookIds.Contains(b.BookID)
                     && b.BookStatus == BookStatusEnum.Active)
+                .ToListAsync();
+
+            var sameAuthorGenre = sameAuthorGenreBooks
                 .OrderByDescending(b => b.AverageRating)
-                .FirstOrDefaultAsync();
+                .FirstOrDefault();
 
             if (sameAuthorGenre != null)
             {
@@ -423,16 +439,19 @@ namespace Group13_Final_Project.Controllers
             needed = 3 - recommendations.Count;
             if (needed > 0)
             {
-                var lowRated = await _context.Books
+                var lowRatedBooks = await _context.Books
                     .Include(b => b.Reviews)
                     .Where(b => b.GenreID == purchasedBook.GenreID
                         && b.BookID != purchasedBook.BookID
                         && !customerBookIds.Contains(b.BookID)
                         && !recommendations.Select(r => r.BookID).Contains(b.BookID)
                         && b.BookStatus == BookStatusEnum.Active)
+                    .ToListAsync();
+
+                var lowRated = lowRatedBooks
                     .OrderBy(b => b.AverageRating)
                     .Take(needed)
-                    .ToListAsync();
+                    .ToList();
 
                 recommendations.AddRange(lowRated);
             }
@@ -512,6 +531,10 @@ namespace Group13_Final_Project.Controllers
                 TempData["Error"] = "You already have the maximum of 3 credit cards.";
                 return RedirectToAction("MyCards");
             }
+
+            // Remove CustomerID from validation - it's set by the controller
+            ModelState.Remove("CustomerID");
+            ModelState.Remove("Customer");
 
             // Validate card number
             if (string.IsNullOrEmpty(card.CardNumber) || card.CardNumber.Length != 16 || !card.CardNumber.All(char.IsDigit))
