@@ -285,7 +285,7 @@ namespace Group13_Final_Project.Controllers
                 return View("Error", errorList);
             }
 
-            //this is the happy path - seeding worked!
+            
             return View("Confirm");
         }
     }
