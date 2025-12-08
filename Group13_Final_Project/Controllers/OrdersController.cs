@@ -350,6 +350,7 @@ namespace Group13_Final_Project.Controllers
 
             var order = await _context.Orders
                 .Include(o => o.Customer)
+                .Include(o => o.OrderDetails)
                 .FirstOrDefaultAsync(m => m.OrderID == id);
 
             if (order == null)

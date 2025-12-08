@@ -202,7 +202,7 @@
                             <div class="form-group mb-3">
                                 <label for="quantity">Quantity:</label>
                                 <select name="quantity" id="quantity" class="form-control">
-                                    @for (int i = 1; i <= Math.Min(10, Model.InventoryQuantity); i++)
+                                    @for (int i = 1; i <= Model.InventoryQuantity; i++)
                                     {
                                         <option value="@i">@i</option>
                                     }
