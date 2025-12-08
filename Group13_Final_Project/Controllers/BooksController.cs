@@ -58,49 +58,52 @@ namespace Group13_Final_Project.Controllers
                 books = books.Where(b => b.GenreID == genreId.Value);
             }
 
-            // Filter by in stock only
+            // Filter by in stock only (use raw DB columns, not computed property)
             if (inStockOnly)
             {
-                books = books.Where(b => b.InStock);
+                books = books.Where(b => b.InventoryQuantity > 0 && b.BookStatus == BookStatusEnum.Active);
             }
+
+            // For sorting by computed properties (AverageRating), we need to load data first
+            List<Book> bookList;
 
             // Sorting
             switch (sortOrder)
             {
                 case "title":
-                    books = books.OrderBy(b => b.Title);
+                    bookList = await books.OrderBy(b => b.Title).ToListAsync();
                     break;
                 case "title_desc":
-                    books = books.OrderByDescending(b => b.Title);
+                    bookList = await books.OrderByDescending(b => b.Title).ToListAsync();
                     break;
                 case "author":
-                    books = books.OrderBy(b => b.Authors);
+                    bookList = await books.OrderBy(b => b.Authors).ToListAsync();
                     break;
                 case "author_desc":
-                    books = books.OrderByDescending(b => b.Authors);
+                    bookList = await books.OrderByDescending(b => b.Authors).ToListAsync();
                     break;
                 case "popular":
-                    // Most popular = total number of times purchased
-                    books = books.OrderByDescending(b => b.OrderDetails.Sum(od => od.Quantity));
+                    // Most popular = total number of times purchased (handle null)
+                    bookList = await books.ToListAsync();
+                    bookList = bookList.OrderByDescending(b => b.OrderDetails?.Sum(od => od.Quantity) ?? 0).ToList();
                     break;
                 case "newest":
                     // Newest first based on publication date
-                    books = books.OrderByDescending(b => b.PublishDate);
+                    bookList = await books.OrderByDescending(b => b.PublishDate).ToListAsync();
                     break;
                 case "oldest":
                     // Oldest first based on publication date
-                    books = books.OrderBy(b => b.PublishDate);
+                    bookList = await books.OrderBy(b => b.PublishDate).ToListAsync();
                     break;
                 case "rating":
-                    // Highest rated
-                    books = books.OrderByDescending(b => b.AverageRating);
+                    // Highest rated - must sort in memory since AverageRating is computed
+                    bookList = await books.ToListAsync();
+                    bookList = bookList.OrderByDescending(b => b.AverageRating).ToList();
                     break;
                 default:
-                    books = books.OrderBy(b => b.Title);
+                    bookList = await books.OrderBy(b => b.Title).ToListAsync();
                     break;
             }
-
-            var bookList = await books.ToListAsync();
 
             // Record count for display
             ViewBag.RecordCount = $"Showing {bookList.Count} of {totalBooks} Books";

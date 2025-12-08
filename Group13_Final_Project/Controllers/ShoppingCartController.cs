@@ -233,10 +233,36 @@ namespace Group13_Final_Project.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
+            // Calculate shipping and discount based on coupon
+            decimal shipping = cart.CalculateShipping();
+            decimal discount = 0;
+
+            // Check for applied coupon
+            int? couponId = HttpContext.Session.GetInt32("AppliedCouponID");
+            if (couponId.HasValue)
+            {
+                var coupon = await _context.Coupons.FindAsync(couponId.Value);
+                if (coupon != null && coupon.Status)
+                {
+                    if (coupon.CouponType == CouponTypeEnum.PercentOff && coupon.DiscountPercent.HasValue)
+                    {
+                        discount = cart.Subtotal * (coupon.DiscountPercent.Value / 100);
+                    }
+                    else if (coupon.CouponType == CouponTypeEnum.FreeShipping)
+                    {
+                        if (coupon.FreeThreshold == null || cart.Subtotal >= coupon.FreeThreshold.Value)
+                        {
+                            shipping = 0;
+                        }
+                    }
+                }
+            }
+
             var viewModel = new CheckoutViewModel
             {
                 Cart = cart,
-                Shipping = cart.CalculateShipping(),
+                Shipping = shipping,
+                Discount = discount,
                 SavedCards = user.Cards ?? new List<Card>()
             };
 
@@ -342,7 +368,7 @@ namespace Group13_Final_Project.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            // Validate card selection
+            // Validate card selection - must have either existing card or new card
             int? cardId = null;
             if (selectedCardId.HasValue && selectedCardId.Value > 0)
             {
@@ -386,6 +412,12 @@ namespace Group13_Final_Project.Controllers
                 _context.Cards.Add(newCard);
                 await _context.SaveChangesAsync();
                 cardId = newCard.CardID;
+            }
+            else
+            {
+                // No card selected and no new card provided
+                TempData["Error"] = "Please select a payment method or enter a new card.";
+                return RedirectToAction("Checkout");
             }
 
             // Validate inventory one more time

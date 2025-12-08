@@ -7,6 +7,27 @@
 <h1>Edit Profile</h1>
 <p class="text-muted">Update your account information. Note: Email address cannot be changed.</p>
 
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-warning">
+        <strong>Validation errors:</strong>
+        <ul>
+        @foreach (var modelError in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <li>@modelError.ErrorMessage</li>
+        }
+        </ul>
+    </div>
+}
+
 <hr />
 <div class="row">
     <div class="col-md-6">
@@ -37,6 +58,7 @@
             <div class="form-group">
                 <label asp-for="Email" class="control-label"></label>
                 <input asp-for="Email" class="form-control" readonly disabled />
+                <input type="hidden" asp-for="Email" />
                 <small class="form-text text-muted">Email address cannot be changed.</small>
             </div>
 

@@ -42,7 +42,7 @@
                     </div>
                     <div class="d-flex justify-content-between mb-2">
                         <span>Shipping:</span>
-                        <span id="shippingDisplay">@Model.Shipping.ToString("C")</span>
+                        <span id="shippingDisplay">@(Model.Shipping == 0 ? "FREE" : Model.Shipping.ToString("C"))</span>
                     </div>
                     @if (appliedCouponId.HasValue)
                     {
@@ -52,6 +52,13 @@
                                 <button type="submit" class="btn btn-sm btn-link text-danger p-0">[Remove]</button>
                             </form>
                         </div>
+                        @if (Model.Discount > 0)
+                        {
+                            <div class="d-flex justify-content-between mb-2 text-success">
+                                <span>Discount:</span>
+                                <span>-@Model.Discount.ToString("C")</span>
+                            </div>
+                        }
                     }
                     <hr />
                     <div class="d-flex justify-content-between">
