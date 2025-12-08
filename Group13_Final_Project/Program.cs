@@ -122,7 +122,6 @@ using (var scope = app.Services.CreateScope())
     await SeedRoles.AddAllRoles(roleManager);
     SeedGenres.SeedAllGenres(dbContext);
     SeedBooks.SeedAllBooks(dbContext);
-    SeedCoupons.SeedAllCoupons(dbContext);
     await SeedCustomers.SeedAllCustomers(userManager, dbContext);
     await SeedEmployees.SeedAllEmployees(userManager, dbContext);
     SeedCards.SeedAllCards(userManager, dbContext);

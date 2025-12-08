@@ -86,7 +86,6 @@ namespace Group13_Final_Project.Controllers
                 Seeding.SeedCards.SeedAllCards(_userManager, _context);
                 Seeding.SeedReviews.SeedAllReviews(_userManager, _context);
                 Seeding.SeedOrders.SeedAllOrders(_userManager, _context);
-                Seeding.SeedCoupons.SeedAllCoupons(_context);
             }
             catch (Exception ex)
             {
