@@ -131,6 +131,9 @@ namespace Group13_Final_Project.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateManual([Bind("BookID,Cost,Quantity")] Reorder reorder)
         {
+            // Remove navigation property from validation - it's not submitted in the form
+            ModelState.Remove("Book");
+
             if (reorder.Cost <= 0)
             {
                 ModelState.AddModelError("Cost", "Cost must be greater than zero.");
@@ -151,8 +154,18 @@ namespace Group13_Final_Project.Controllers
 
             var book = await _context.Books
                 .Include(b => b.Genre)
+                .Include(b => b.Reorders)
+                .Include(b => b.OrderDetails)
                 .FirstOrDefaultAsync(b => b.BookID == reorder.BookID);
+
+            // Set required ViewBag values for the view
             ViewBag.Book = book;
+            var lastReorder = book?.Reorders?.OrderByDescending(r => r.Date).FirstOrDefault();
+            ViewBag.DefaultCost = lastReorder?.Cost ?? book?.Cost ?? 0;
+            var orderDetails = book?.OrderDetails?.ToList() ?? new List<OrderDetail>();
+            ViewBag.AverageProfitMargin = orderDetails.Any()
+                ? orderDetails.Average(od => od.Price - od.Cost)
+                : 0m;
 
             return View(reorder);
         }

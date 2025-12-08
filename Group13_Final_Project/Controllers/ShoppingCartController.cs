@@ -22,6 +22,13 @@ namespace Group13_Final_Project.Controllers
         // GET: ShoppingCart
         public async Task<IActionResult> Index()
         {
+            // Check if user is Admin or Employee - they cannot buy books
+            if (User.IsInRole("Admin") || User.IsInRole("Employee"))
+            {
+                TempData["Error"] = "Administrators and employees cannot purchase books.";
+                return RedirectToAction("Index", "Home");
+            }
+
             var cart = HttpContext.Session.GetCart();
             var messages = new List<string>();
             var itemsToRemove = new List<int>();
@@ -110,6 +117,7 @@ namespace Group13_Final_Project.Controllers
         // POST: ShoppingCart/AddToCart
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> AddToCart(int bookId, int quantity = 1)
         {
             var book = await _context.Books.FindAsync(bookId);
@@ -146,6 +154,7 @@ namespace Group13_Final_Project.Controllers
         // POST: ShoppingCart/UpdateQuantity
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> UpdateQuantity(int bookId, int quantity)
         {
             var cart = HttpContext.Session.GetCart();
@@ -175,6 +184,7 @@ namespace Group13_Final_Project.Controllers
         // POST: ShoppingCart/RemoveItem
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Customer")]
         public IActionResult RemoveItem(int bookId)
         {
             var cart = HttpContext.Session.GetCart();
@@ -187,6 +197,7 @@ namespace Group13_Final_Project.Controllers
         // POST: ShoppingCart/Clear
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Customer")]
         public IActionResult Clear()
         {
             HttpContext.Session.ClearCart();
